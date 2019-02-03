@@ -6,7 +6,11 @@
   "scripts": {
     "start": "electron ."
   },
-  "keywords": ["numbered musical notation", "performance", "play"],
+  "keywords": [
+    "numbered musical notation",
+    "performance",
+    "play"
+  ],
   "license": "MIT",
   "devDependencies": {
     "electron": "4.0.3"
