@@ -1,3 +1,4 @@
+// 以下手柄相关
 var haveEvents = 'ongamepadconnected' in window;
 var controllers = {};
 
@@ -10,26 +11,38 @@ function disconnecthandler(e) {
     delete controllers[e.gamepad.index];
 }
 
-
-// 各个琴键在窗口里对应的对象(DOM)
-const lowKey    = document.getElementById('low');
-const flatKey   = document.getElementById('flat');
-const doKey     = document.getElementById('do');
-const reKey     = document.getElementById('re');
-const miKey     = document.getElementById('mi');
-const faKey     = document.getElementById('fa');
-const soKey     = document.getElementById('so');
-const laKey     = document.getElementById('la');
-const siKey     = document.getElementById('si');
-const ddKey     = document.getElementById('dd');
-const sharpKey  = document.getElementById('sharp');
-const highKey   = document.getElementById('high');
-const SIDEKEY = 'sideKey';
-const PRESS = ' press';
-const MAINKEY = 'mainKey';
+const controllerPress = {
+    LT: pressLow,
+    RT: pressHigh,
+    LB: pressFlat,
+    RB: pressSharp,
+    L:  pressDo,
+    U:  pressRe,
+    R:  pressMi,
+    D:  pressFa,
+    X:  pressSo,
+    Y:  pressLa,
+    B:  pressSi,
+    A:  pressDD
+};
+const controllerRelease = {
+    LT: releaseLow,
+    RT: releaseHigh,
+    LB: releaseFlat,
+    RB: releaseSharp,
+    L:  releaseDo,
+    U:  releaseRe,
+    R:  releaseMi,
+    D:  releaseFa,
+    X:  releaseSo,
+    Y:  releaseLa,
+    B:  releaseSi,
+    A:  releaseDD
+};
 
 // 上一次刷新各个按键的状态。true：按下状态，false：松开状态
 // let LT=false, RT=false, LB=false, RB=false;
+let LT=false, RT=false, LB=false, RB=false;
 let L=false, U=false, R=false, D=false;
 let X=false, Y=false, B=false, A=false;
 function updateStatus() {
@@ -45,54 +58,32 @@ function updateStatus() {
         let cL=bs[14].pressed, cU=bs[12].pressed, cR=bs[15].pressed, cD=bs[13].pressed;
         let cX=bs[2].pressed, cY=bs[3].pressed, cB=bs[1].pressed, cA=bs[0].pressed;
 
-        // 设置钢琴琴键被按住时的变化
-        lowKey.className = cLT? SIDEKEY+PRESS : SIDEKEY;
-        highKey.className = cRT? SIDEKEY+PRESS : SIDEKEY;
-        flatKey.className = cLB? SIDEKEY+PRESS : SIDEKEY;
-        sharpKey.className = cRB? SIDEKEY+PRESS : SIDEKEY;
-        doKey.className = cL? MAINKEY+PRESS : MAINKEY;
-        reKey.className = cU? MAINKEY+PRESS : MAINKEY;
-        miKey.className = cR? MAINKEY+PRESS : MAINKEY;
-        faKey.className = cD? MAINKEY+PRESS : MAINKEY;
-        soKey.className = cX? MAINKEY+PRESS : MAINKEY;
-        laKey.className = cY? MAINKEY+PRESS : MAINKEY;
-        siKey.className = cB? MAINKEY+PRESS : MAINKEY;
-        ddKey.className = cA? MAINKEY+PRESS : MAINKEY;
+        if(cLT && !LT) controllerPress.LT();
+        if(cRT && !RT) controllerPress.RT();
+        if(cLB && !LB) controllerPress.LB();
+        if(cRB && !RB) controllerPress.RB();
+        if(cL && !L) controllerPress.L();
+        if(cU && !U) controllerPress.U();
+        if(cR && !R) controllerPress.R();
+        if(cD && !D) controllerPress.D();
+        if(cX && !X) controllerPress.X();
+        if(cY && !Y) controllerPress.Y();
+        if(cB && !B) controllerPress.B();
+        if(cA && !A) controllerPress.A();
+        if(!cLT && LT) controllerRelease.LT();
+        if(!cRT && RT) controllerRelease.RT();
+        if(!cLB && LB) controllerRelease.LB();
+        if(!cRB && RB) controllerRelease.RB();
+        if(!cL && L) controllerRelease.L();
+        if(!cU && U) controllerRelease.U();
+        if(!cR && R) controllerRelease.R();
+        if(!cD && D) controllerRelease.D();
+        if(!cX && X) controllerRelease.X();
+        if(!cY && Y) controllerRelease.Y();
+        if(!cB && B) controllerRelease.B();
+        if(!cA && A) controllerRelease.A();
 
-        let step=0, height=0;
-        if((cLT&&cRT) || (!cLT&&!cRT))
-            height = 0;
-        else if(cLT)
-            height = -12;
-        else // cRT
-            height = 12;
-        if((cLB&&cRB) || (!cLB&&!cRB))
-            step = 0;
-        else if(cLB)
-            step = -1;
-        else // RB
-            step = 1;
-
-        let indexBase = 12+step+height;
-        let toneBase = do1+step+height;
-        if(cL && !L) performable[indexBase   ]=player.play(toneBase);
-        if(cU && !U) performable[indexBase+2 ]=player.play(toneBase+2);
-        if(cR && !R) performable[indexBase+4 ]=player.play(toneBase+4);
-        if(cD && !D) performable[indexBase+5 ]=player.play(toneBase+5);
-        if(cX && !X) performable[indexBase+7 ]=player.play(toneBase+7);
-        if(cY && !Y) performable[indexBase+9 ]=player.play(toneBase+9);
-        if(cB && !B) performable[indexBase+11]=player.play(toneBase+11);
-        if(cA && !A) performable[indexBase+12]=player.play(toneBase+12);
-        // if(!cL && L) performable[indexBase   ].stop();
-        // if(!cU && U) performable[indexBase+2 ].stop();
-        // if(!cR && R) performable[indexBase+4 ].stop();
-        // if(!cD && D) performable[indexBase+5 ].stop();
-        // if(!cX && X) performable[indexBase+7 ].stop();
-        // if(!cY && Y) performable[indexBase+9 ].stop();
-        // if(!cB && B) performable[indexBase+11].stop();
-        // if(!cA && A) performable[indexBase+12].stop();
-
-        L=cL; U=cU; R=cR; D=cD; X=cX; Y=cY; B=cB; A=cA;
+        LT=cLT; RT=cRT; LB=cLB; RB=cRB; L=cL; U=cU; R=cR; D=cD; X=cX; Y=cY; B=cB; A=cA;
     }
 
     requestAnimationFrame(updateStatus);
@@ -111,16 +102,56 @@ function scangamepads() {
     }
 }
 
-const performable = new Array(36); // 对应midi-number 48~83
-let do1 = 60; // do对应的midi-number
-
-let player;
-const audioContext = new AudioContext();
-Soundfont.instrument(audioContext, 'acoustic_grand_piano').then(function (p) {player=p;});
-
 window.addEventListener("gamepadconnected", connecthandler);
 window.addEventListener("gamepaddisconnected", disconnecthandler);
 
 if (!haveEvents) {
     setInterval(scangamepads, 500);
 }
+// 以上为手柄相关
+// 以下为键盘相关
+const keyboardAction = {
+    low: 'ShiftLeft',
+    flat: 'AltLeft',
+    do: 'KeyA',
+    re: 'KeyS',
+    mi: 'KeyD',
+    fa: 'KeyF',
+    so: 'KeyJ',
+    la: 'KeyK',
+    si: 'KeyL',
+    dd: 'Semicolon',
+    sharp: 'AltRight',
+    high: 'ShiftRight'
+};
+document.addEventListener('keydown', (e)=>{
+    switch (e.code) {
+        case keyboardAction.low: pressLow(); break;
+        case keyboardAction.flat: pressFlat(); break;
+        case keyboardAction.do: pressDo(); break;
+        case keyboardAction.re: pressRe(); break;
+        case keyboardAction.mi: pressMi(); break;
+        case keyboardAction.fa: pressFa(); break;
+        case keyboardAction.so: pressSo(); break;
+        case keyboardAction.la: pressLa(); break;
+        case keyboardAction.si: pressSi(); break;
+        case keyboardAction.dd: pressDD(); break;
+        default:
+    }
+});
+document.addEventListener('keyup', (e)=>{
+    switch (e.code) {
+        case keyboardAction.low: releaseLow(); break;
+        case keyboardAction.flat: releaseFlat(); break;
+        case keyboardAction.do: releaseDo(); break;
+        case keyboardAction.re: releaseRe(); break;
+        case keyboardAction.mi: releaseMi(); break;
+        case keyboardAction.fa: releaseFa(); break;
+        case keyboardAction.so: releaseSo(); break;
+        case keyboardAction.la: releaseLa(); break;
+        case keyboardAction.si: releaseSi(); break;
+        case keyboardAction.dd: releaseDD(); break;
+        default:
+    }
+});
+// 以上为键盘相关

@@ -1,10 +1,12 @@
 # 打谱机
 
+一款用electron框架创建的编写简谱、播放简谱、练习和辅助演奏的软件
+
 ## 用法
 
 ### 直接从源码运行
 
-从源码运行打谱机需要Nodejs，可以从[Nodejs官网安装][https://nodejs.org]。安装好Nodejs后确认```node```和```npm```这两个命令可以使用。
+从源码运行打谱机需要Nodejs，可以从[Nodejs官网安装](https://nodejs.org)。安装好Nodejs后确认```node```和```npm```这两个命令可以使用。
 
 > 注：```npm```是Nodejs的包管理器，国内下载速度很不稳定，可以使用```cnpm```代替```npm```。用命令```npm install -g cnpm```安装```cnpm```。
 
@@ -17,7 +19,7 @@ $ npm start
 
 ### 直接下载打包好的程序
 
-打包好的程序将在0.1.0版本后开始提供。当然你若需要打包好的程序，可以用[electron-packager][https://github.com/electron-userland/electron-packager]自行打包。
+打包好的程序将在0.1.0版本后开始提供。当然你若需要打包好的程序，可以用[electron-packager](https://github.com/electron-userland/electron-packager)自行打包。
 
 ## 功能
 
