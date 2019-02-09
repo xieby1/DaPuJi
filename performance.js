@@ -76,20 +76,21 @@ if (!haveEvents) {
 }
 // 以上为手柄相关
 // 以下为键盘相关
-const KeyboardAction = {
-    low: 'ShiftLeft', flat: 'AltLeft', sharp: 'AltRight', high: 'ShiftRight',
-    do: 'KeyA', re: 'KeyS', mi: 'KeyD', fa: 'KeyF',
-    so: 'KeyJ', la: 'KeyK', si: 'KeyL', dd: 'Semicolon'
-};
-document.addEventListener('keydown', (e)=>{
-    for(let key in KeyboardAction)
-        if(e.code === KeyboardAction[key])
-            FuncPress[key]();
-});
-document.addEventListener('keyup', (e)=>{
-
-    for(let key in KeyboardAction)
-        if(e.code === KeyboardAction[key])
-            FuncRelease[key]();
-});
+// const KeyboardAction = {
+//     low: {key: 'Shift', code: 'ShiftLeft'}, flat: {key: 'Alt', code: 'AltLeft'},
+//     sharp: 'AltRight', high: 'ShiftRight',
+//     do: 'KeyA', re: 'KeyS', mi: 'KeyD', fa: 'KeyF',
+//     so: 'KeyJ', la: 'KeyK', si: 'KeyL', dd: 'Semicolon'
+// };
+// document.addEventListener('keydown', (e)=>{
+//     for(let key in KeyboardAction)
+//         if(e.code === KeyboardAction[key])
+//             FuncPress[key]();
+// });
+// document.addEventListener('keyup', (e)=>{
+//
+//     for(let key in KeyboardAction)
+//         if(e.code === KeyboardAction[key])
+//             FuncRelease[key]();
+// });
 // 以上为键盘相关
