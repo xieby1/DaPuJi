@@ -1,6 +1,76 @@
 const { ipcRenderer} = require('electron');
+const {getPlayEvents} = require('./src/functions/SoundfontEventsProvider');
+const {parseHead} = require('./src/functions/header');
 // true-left, false-right
 const InstrumentLayoutStatus = {fullOrFolded: false, keyboardOrController: false};
+
+// 以下为滚动区域相关
+let notes = '';
+let playEvents = [];
+let aheadOfTime = 3000; // ms
+let startTime = 0;
+let refreshFunc = ()=>{};
+// 怠速 idling。让scrollArea一直刷新，直到刷新函数为有效时就可显示图像
+let isLooping = false;
+function startScrollAreaLoop() {
+    refreshFunc();
+    requestAnimationFrame(startScrollAreaLoop);
+}
+const scrollArea = document.getElementById('scrollArea');
+function drawScrollArea(relativeTime){
+    // clean scroll area
+    scrollArea.innerText = '';
+    let scrollAreaHeight = scrollArea.offsetHeight;
+    for(let e of playEvents)
+    {
+        let deltaTime = e.time*1000 - relativeTime;
+        let midi = e.note;
+        if(midi-do1<-12 || midi-do1>24)
+        {
+            // TODO: out of range !!!
+        }
+
+        if(InstrumentLayoutStatus.fullOrFolded)
+        { // full mode
+            let keyDOM;
+            for(let key in KeyboardModeTemplate)
+            {
+                if(do1+KeyboardModeTemplate[key]===midi)
+                {
+                    keyDOM = Keys[key];
+                    break;
+                }
+            }
+            if(keyDOM!=null)
+            {
+                let scrollBarDOM = document.createElement('div');
+                let scrollBarWidth = keyDOM.offsetWidth;
+                let scrollBarHeight= scrollBarWidth;
+                let scrollBarToBottom = deltaTime/aheadOfTime*scrollAreaHeight - scrollBarWidth/2;
+                let scrollBarOffsetLeft = keyDOM.offsetLeft;
+
+                if(scrollBarToBottom + scrollBarHeight > 0 && scrollBarToBottom<scrollAreaHeight)
+                {
+                    scrollBarDOM.setAttribute('style',
+                    'position: absolute; ' +
+                    'left:' + scrollBarOffsetLeft + 'px;' +
+                    'bottom:' + (scrollBarToBottom+120) + 'px;' +
+                    'width:' + scrollBarWidth + 'px;' +
+                    'height:' + scrollBarHeight + 'px;' +
+                    'background-color: red;');
+                    scrollBarDOM.setAttribute('class', 'scrollBar')
+                    scrollArea.appendChild(scrollBarDOM);
+                }
+            }
+        }
+        else
+        { // folded mode
+
+        }
+    }
+}
+// 以上为滚动区域相关
+
 // 以下手柄相关
 let haveEvents = 'ongamepadconnected' in window;
 let controllers = {};
@@ -49,7 +119,7 @@ const ControllerButtonNum = {
 
 function updateStatus() {
     if (!haveEvents) {
-        scangamepads();
+        scanGamepads();
     }
 
     for (let j in controllers) {
@@ -70,14 +140,18 @@ function updateStatus() {
     requestAnimationFrame(updateStatus);
 }
 
-function scangamepads() {
-    var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : []);
-    for (var i = 0; i < gamepads.length; i++) {
+function addGamepad(gamepad) {
+    controllers[gamepad.index] = gamepad;
+}
+
+function scanGamepads() {
+    let gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : []);
+    for (let i = 0; i < gamepads.length; i++) {
         if (gamepads[i]) {
             if (gamepads[i].index in controllers) {
                 controllers[gamepads[i].index] = gamepads[i];
             } else {
-                addgamepad(gamepads[i]);
+                addGamepad(gamepads[i]);
             }
         }
     }
@@ -87,7 +161,7 @@ window.addEventListener("gamepadconnected", connectHandler);
 window.addEventListener("gamepaddisconnected", disconnectHandler);
 
 if (!haveEvents) {
-    setInterval(scangamepads, 500);
+    setInterval(scanGamepads, 500);
 }
 // 以上为手柄相关
 // 以下为键盘相关
@@ -174,6 +248,24 @@ ipcRenderer.on('action', (event, arg) => {
                 switchToFullMode();
                 InstrumentLayoutStatus.fullOrFolded = true;
             }
+            break;
+        case 'start':
+            startTime = (new Date()).getTime();
+            refreshFunc = ()=>{
+                drawScrollArea((new Date()).getTime()-startTime-aheadOfTime);
+            };
+            break;
         default:
     }
+});
+
+ipcRenderer.on('notes', (event, arg)=>{
+    notes = arg;
+    // window.alert("receive notes!");
+    let headInfo = parseHead(arg);
+    playEvents = getPlayEvents(arg, headInfo);
+    drawScrollArea(-aheadOfTime);
+    if(!isLooping)
+        startScrollAreaLoop();
+    isLooping = true;
 });

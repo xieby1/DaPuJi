@@ -13,7 +13,13 @@ const bpm_beatInfo = document.getElementById('bpm_beatInfo');
 
 const editor = CodeMirror(editArea, {
     // 编辑器的初始内容
-    value: 'title = "新的谱子"\nbpm = 80 beatInfo={4/4}\n',
+    value: 'title = "To Zanarkand - 片段"\n' +
+        'bpm = 92 beatInfo={3/4}\n' +
+        '\n' +
+        '3+/ 3/ 5/ 7/ 3+/ 4#/+ 5+..\n' +
+        '2+/ 2/ 4#/ 6/ 2+/ 3+/ 4+#..\n' +
+        '7 7 7 7 6/. 2+/ 4#..\n' +
+        '3+ 3+ 3+ 3+ 2+ 5+ 1+..',
     mode: 'musicnotes',
     lineWrapping: 'true',
     lineNumbers: 'true',
@@ -77,6 +83,10 @@ ipcRenderer.on('action', (event, arg) => {
                 player.schedule(audioContext.currentTime, getPlayEvents(editor.getValue(), headInfo));
             }
             break;
+        case 'prepareAidPerform':
+            ipcRenderer.send('notesPrepared', editor.getValue());
+            break;
+        default:
     }
     // switch (arg) {
     //     case 'new': // 新建文件

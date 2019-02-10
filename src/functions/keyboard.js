@@ -1,3 +1,7 @@
+const FOLDEDKEYWIDTH = 100/12;
+const WHITEKEYWIDTH = 100/26;
+const BLACKKEYWIDTH = 2;
+
 let player;
 const audioContext = new AudioContext();
 Soundfont.instrument(audioContext, 'acoustic_grand_piano').then(function (p) {player=p;});
@@ -69,7 +73,7 @@ for(let key in KeyboardModeTemplate)
 function switchToFoldedMode() {
     for(let child of keyboard.children)
         keyboard.removeChild(child);
-    let left = 0, step = 8.333; // 100/12
+    let left = 0, step = FOLDEDKEYWIDTH;
     for(let key in ControllerModeTemplate)
     {
         Keys[key].setAttribute('style', 'left: '+left+'%; position: absolute;');
@@ -80,14 +84,14 @@ function switchToFoldedMode() {
 function switchToFullMode() {
     for(let child of keyboard.children)
         keyboard.removeChild(child);
-    let left = 0; step = 3.846; //100/26
+    let left = 0; let step = WHITEKEYWIDTH;
     for(let key in KeyboardWhiteTemplate)
     {
         Keys[key].setAttribute('style', 'left: '+left+'%; position: absolute; width: '+step+'%;');
         left += step;
         keyboard.appendChild(Keys[key])
     }
-    let blackKeyWidth = 2;
+    let blackKeyWidth = BLACKKEYWIDTH;
     left = 3*step-blackKeyWidth/2;
     let counter = 1;
     for(let key in KeyboardBlackTemplate)

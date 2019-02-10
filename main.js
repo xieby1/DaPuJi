@@ -49,9 +49,26 @@ function creatPerformanceWindow(menu)
     const performanceMenu = Menu.buildFromTemplate(appMenuTemplate);
     performanceMenu.items[0].submenu.append(new MenuItem({
         label: 'Switch Mode',
-        accelerator: 'CmdOrCtrl+s',
+        accelerator: 'CmdOrCtrl+m',
         click: ()=>{
             performanceWindow.webContents.send('action', 'switchMode');
+        }
+    }));
+    performanceMenu.items[0].submenu.append(new MenuItem({
+        type: 'separator'
+    }));
+    performanceMenu.items[0].submenu.append(new MenuItem({
+        label: 'Aid Perform',
+        accelerator: 'CmdOrCtrl+p',
+        click: ()=>{
+            mainWindow.webContents.send('action', 'prepareAidPerform');
+        }
+    }));
+    performanceMenu.items[0].submenu.append(new MenuItem({
+        label: 'Start',
+        accelerator: 'CmdOrCtrl+s',
+        click: ()=>{
+            performanceWindow.webContents.send('action', 'start');
         }
     }));
     performanceWindow.setMenu(performanceMenu);
@@ -94,6 +111,10 @@ ipcMain.on('performanceAction', (event, arg)=>{
             break;
         default:
     }
+});
+
+ipcMain.on('notesPrepared', (event, notes)=>{
+    performanceWindow.webContents.send('notes', notes);
 });
 
 // In this file you can include the rest of your app's specific main process
