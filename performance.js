@@ -1,15 +1,16 @@
-switchToFoldedMode();
-switchToFullMode();
+const { ipcRenderer} = require('electron');
+// true-left, false-right
+const InstrumentLayoutStatus = {fullOrFolded: false, keyboardOrController: false};
 // 以下手柄相关
-var haveEvents = 'ongamepadconnected' in window;
-var controllers = {};
+let haveEvents = 'ongamepadconnected' in window;
+let controllers = {};
 
-function connecthandler(e) {
+function connectHandler(e) {
     controllers[e.gamepad.index] = e.gamepad;
     requestAnimationFrame(updateStatus);
 }
 
-function disconnecthandler(e) {
+function disconnectHandler(e) {
     delete controllers[e.gamepad.index];
 }
 const ControllerTemplate = {
@@ -17,11 +18,22 @@ const ControllerTemplate = {
     L: 'do', U: 're', R: 'mi', D: 'fa',
     X: 'so', Y: 'la', B: 'si', A: 'dd'
 };
+
+switchToFoldedMode();
+refreshControllerButtonTag();
+
 const ControllerPress = {};
 const ControllerRelease = {};
 for(let key in ControllerTemplate)
 {
-    ControllerPress[key] = FuncPress[ControllerTemplate[key]];
+    ControllerPress[key] = ()=>{
+        if(InstrumentLayoutStatus.keyboardOrController)
+        {
+            refreshControllerButtonTag();
+            InstrumentLayoutStatus.keyboardOrController = false;
+        }
+        FuncPress[ControllerTemplate[key]]();
+    };
     ControllerRelease[key] = FuncRelease[ControllerTemplate[key]];
 }
 
@@ -70,29 +82,97 @@ function scangamepads() {
     }
 }
 
-window.addEventListener("gamepadconnected", connecthandler);
-window.addEventListener("gamepaddisconnected", disconnecthandler);
+window.addEventListener("gamepadconnected", connectHandler);
+window.addEventListener("gamepaddisconnected", disconnectHandler);
 
 if (!haveEvents) {
     setInterval(scangamepads, 500);
 }
 // 以上为手柄相关
 // 以下为键盘相关
-// const KeyboardAction = {
-//     low: {key: 'Shift', code: 'ShiftLeft'}, flat: {key: 'Alt', code: 'AltLeft'},
-//     sharp: 'AltRight', high: 'ShiftRight',
-//     do: 'KeyA', re: 'KeyS', mi: 'KeyD', fa: 'KeyF',
-//     so: 'KeyJ', la: 'KeyK', si: 'KeyL', dd: 'Semicolon'
-// };
-// document.addEventListener('keydown', (e)=>{
-//     for(let key in KeyboardAction)
-//         if(e.code === KeyboardAction[key])
-//             FuncPress[key]();
-// });
-// document.addEventListener('keyup', (e)=>{
-//
-//     for(let key in KeyboardAction)
-//         if(e.code === KeyboardAction[key])
-//             FuncRelease[key]();
-// });
+// creatAKeyBoardAction
+function cKA(key, code) {
+    return {key: key, code: code};
+}
+
+const KeyboardAction = {
+    low: cKA('Shift', 'ShiftLeft'),
+    high: cKA('Ctrl', 'ControlLeft'),
+    do: cKA('q', 'KeyQ'), re: cKA('w', 'KeyW'),
+    mi: cKA('e', 'KeyE'), fa: cKA('r', 'KeyR'),
+    so: cKA('t', 'KeyT'), la: cKA('y', 'KeyY'),
+    si: cKA('u', 'KeyU'), dd: cKA('i', 'KeyI'),
+    doS:cKA('2', 'Digit2'),reS:cKA('3','Digit3'),
+    faS:cKA('5', 'Digit5'),soS:cKA('6', 'Digit6'),
+    laS:cKA('7', 'Digit7')
+};
+for(let key in KeyboardModeTemplate)
+    if(!(key in KeyboardAction))
+        KeyboardAction[key] = cKA('', '');
+
+document.addEventListener('keydown', (e)=>{
+    if(!InstrumentLayoutStatus.keyboardOrController)
+    {
+        refreshKeyboardButtonTag();
+        InstrumentLayoutStatus.keyboardOrController = true;
+    }
+    for(let key in KeyboardAction)
+        if(e.code === KeyboardAction[key].code)
+            FuncPress[key]();
+});
+document.addEventListener('keyup', (e)=>{
+
+    for(let key in KeyboardAction)
+        if(e.code === KeyboardAction[key].code)
+            FuncRelease[key]();
+});
 // 以上为键盘相关
+function refreshKeyboardButtonTag()
+{
+    for(let key in KeyboardModeTemplate)
+    {
+        for(let elem of Keys[key].children)
+        {
+            if(elem.className==='key')
+            {
+                elem.innerText = KeyboardAction[key]['key'];
+                break;
+            }
+        }
+    }
+}
+function refreshControllerButtonTag()
+{
+    for(let button in ControllerTemplate)
+    {
+        let key = ControllerTemplate[button];
+        for(let elem of Keys[key].children)
+        {
+            if(elem.className==='key')
+            {
+                elem.innerText = button;
+                break;
+            }
+        }
+    }
+}
+
+// 监听与主进程的通信
+ipcRenderer.on('action', (event, arg) => {
+    switch (arg) {
+        case 'switchMode':
+            if(InstrumentLayoutStatus.fullOrFolded)
+            {
+                ipcRenderer.send('performanceAction', 'resizeFolded');
+                switchToFoldedMode();
+                InstrumentLayoutStatus.fullOrFolded = false;
+            }
+            else
+            {
+                ipcRenderer.send('performanceAction', 'resizeFull');
+                switchToFullMode();
+                InstrumentLayoutStatus.fullOrFolded = true;
+            }
+        default:
+    }
+});

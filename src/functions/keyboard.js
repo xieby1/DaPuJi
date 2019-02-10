@@ -39,7 +39,7 @@ for(let key in KeyboardBlackTemplate)
 // <body>
 // <div id='...' class='...Key'> - tempKey
 //     <div class='key'>...</div>  - tempButtonTag
-// <div class='name'>...</div> - tempNameTag
+//     <div class='name'>...</div> - tempNameTag
 // </div>
 // </body>
 const keyboard = document.createElement('div');
@@ -87,7 +87,7 @@ function switchToFullMode() {
         left += step;
         keyboard.appendChild(Keys[key])
     }
-    let blackKeyWidth = 3;
+    let blackKeyWidth = 2;
     left = 3*step-blackKeyWidth/2;
     let counter = 1;
     for(let key in KeyboardBlackTemplate)

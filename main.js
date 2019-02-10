@@ -16,20 +16,22 @@ function createWindow () {
     // Open the DevTools.
     // mainWindow.webContents.openDevTools()
 
-    const menu = Menu.buildFromTemplate(appMenuTemplate);
-    menu.items[0].submenu.append(new MenuItem({
+    const mainMenu = Menu.buildFromTemplate(appMenuTemplate);
+    mainMenu.items[0].submenu.append(new MenuItem({
         label: 'Play',
-        click(){
+        accelerator:'CmdOrCtrl+Shift+p',
+        click: ()=>{
             mainWindow.webContents.send('action', 'play');
         }
     }));
-    menu.items[0].submenu.append(new MenuItem({
+    mainMenu.items[0].submenu.append(new MenuItem({
         label: 'Perform',
+        accelerator:'CmdOrCtrl+p',
         click(){
             creatPerformanceWindow();
         }
     }));
-    Menu.setApplicationMenu(menu);
+    mainWindow.setMenu(mainMenu);
 
     // Emitted when the window is closed.
     mainWindow.on('closed', function () {
@@ -40,16 +42,28 @@ function createWindow () {
     })
 }
 
-function creatPerformanceWindow()
+function creatPerformanceWindow(menu)
 {
     performanceWindow = new BrowserWindow({width:600, height:300});
     performanceWindow.loadFile('performance.html');
+    const performanceMenu = Menu.buildFromTemplate(appMenuTemplate);
+    performanceMenu.items[0].submenu.append(new MenuItem({
+        label: 'Switch Mode',
+        accelerator: 'CmdOrCtrl+s',
+        click: ()=>{
+            performanceWindow.webContents.send('action', 'switchMode');
+        }
+    }));
+    performanceWindow.setMenu(performanceMenu);
+    performanceWindow.on('closed', function () {
+        performanceWindow = null
+    })
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow)
+app.on('ready', createWindow);
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
@@ -58,7 +72,7 @@ app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') {
         app.quit()
     }
-})
+});
 
 app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -66,7 +80,21 @@ app.on('activate', function () {
     if (mainWindow === null) {
         createWindow()
     }
-})
+});
+
+ipcMain.on('performanceAction', (event, arg)=>{
+    switch (arg) {
+        case 'resizeFull':
+            performanceWindow.setBounds({width: 1200});
+            performanceWindow.center();
+            break;
+        case 'resizeFolded':
+            performanceWindow.setBounds({width: 600});
+            performanceWindow.center();
+            break;
+        default:
+    }
+});
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
