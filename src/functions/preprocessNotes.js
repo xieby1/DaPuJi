@@ -106,5 +106,5 @@ module.exports.replaceWithLatex = function(content, headInfo)
     }
     addLatexChar();
     return latexContent;
-}
+};
 

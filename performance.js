@@ -46,6 +46,7 @@ const ControllerButtonNum = {
     L: 14, U: 12, R: 15, D: 13,
     X: 2, Y: 3, B: 1, A: 0
 };
+
 function updateStatus() {
     if (!haveEvents) {
         scangamepads();
