@@ -1,3 +1,5 @@
+switchToFoldedMode();
+switchToFullMode();
 // 以下手柄相关
 var haveEvents = 'ongamepadconnected' in window;
 var controllers = {};

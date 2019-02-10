@@ -8,12 +8,14 @@
             box-sizing: border-box;
         }
         #keyboard{
-            display: flex;
-            flex-direction: row;
+            /*display: flex;*/
+            /*flex-direction: row;*/
+            position: absolute;
+            bottom: 120px;
+            left: 0;
             width: 100%;
-            bottom: 0;
         }
-        .sideKey, .mainKey{
+        .sideKey, .blackKey, .mainKey{
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -24,6 +26,10 @@
             background-color: white;
             border: 1px solid gray;
             border-radius: 0 0 6px 6px;
+        }
+        .blackKey{
+            background-color: #404040;
+            height: 80px;
         }
         .press{
             background-color: #cccccc;
@@ -39,21 +45,6 @@
     </style>
 </head>
 <body>
-<div id="keyboard">
-    <div id="low" class="sideKey"><div class="key">LT</div><div class="name">↓</div></div>
-    <div id="flat" class="sideKey"><div class="key">LB</div><div class="name">♭</div></div>
-    <div id="do" class="mainKey"><div class="key">L</div><div class="name">1</div></div>
-    <div id="re" class="mainKey"><div class="key">U</div><div class="name">2</div></div>
-    <div id="mi" class="mainKey"><div class="key">R</div><div class="name">3</div></div>
-    <div id="fa" class="mainKey"><div class="key">D</div><div class="name">4</div></div>
-    <div id="so" class="mainKey"><div class="key">X</div><div class="name">5</div></div>
-    <div id="la" class="mainKey"><div class="key">Y</div><div class="name">6</div></div>
-    <div id="si" class="mainKey"><div class="key">B</div><div class="name">7</div></div>
-    <div id="dd" class="mainKey"><div class="key">A</div><div class="name">i</div></div>
-    <div id="sharp" class="sideKey"><div class="key">RB</div><div class="name">♯</div></div>
-    <div id="high" class="sideKey"><div class="key">RT</div><div class="name">↑</div></div>
-</div>
-
 </body>
 <script src="lib/soundfont-player.js"></script>
 <script src="src/functions/keyboard.js"></script>
