@@ -18,6 +18,9 @@ function startScrollAreaLoop() {
 }
 const scrollArea = document.getElementById('scrollArea');
 function drawScrollArea(relativeTime){
+    // 解除loop, 最后一个音的1.1倍时间后解除
+    if(relativeTime > 1100*playEvents[playEvents.length-1].time)
+        refreshFunc = ()=>{};
     // clean scroll area
     scrollArea.innerText = '';
     let scrollAreaHeight = scrollArea.offsetHeight;
@@ -30,9 +33,32 @@ function drawScrollArea(relativeTime){
             // TODO: out of range !!!
         }
 
+
+        let keyDOM;
+        function addAScrollBar(keydom) {
+            if(keydom==null)
+                return;
+            let scrollBarDOM = document.createElement('div');
+            let scrollBarWidth = keydom.offsetWidth;
+            let scrollBarHeight= scrollBarWidth * 0.314;
+            let scrollBarToBottom = deltaTime/aheadOfTime*scrollAreaHeight - scrollBarWidth/2;
+            let scrollBarOffsetLeft = keydom.offsetLeft;
+
+            if(scrollBarToBottom + scrollBarHeight > 0 && scrollBarToBottom<scrollAreaHeight)
+            {
+                scrollBarDOM.setAttribute('style',
+                    'position: absolute; ' +
+                    'left:' + scrollBarOffsetLeft + 'px;' +
+                    'bottom:' + (scrollBarToBottom+120) + 'px;' +
+                    'width:' + scrollBarWidth + 'px;' +
+                    'height:' + scrollBarHeight + 'px;' +
+                    'background-color: red;');
+                scrollBarDOM.setAttribute('class', 'scrollBar');
+                scrollArea.appendChild(scrollBarDOM);
+            }
+        }
         if(InstrumentLayoutStatus.fullOrFolded)
         { // full mode
-            let keyDOM;
             for(let key in KeyboardModeTemplate)
             {
                 if(do1+KeyboardModeTemplate[key]===midi)
@@ -41,31 +67,50 @@ function drawScrollArea(relativeTime){
                     break;
                 }
             }
-            if(keyDOM!=null)
-            {
-                let scrollBarDOM = document.createElement('div');
-                let scrollBarWidth = keyDOM.offsetWidth;
-                let scrollBarHeight= scrollBarWidth;
-                let scrollBarToBottom = deltaTime/aheadOfTime*scrollAreaHeight - scrollBarWidth/2;
-                let scrollBarOffsetLeft = keyDOM.offsetLeft;
-
-                if(scrollBarToBottom + scrollBarHeight > 0 && scrollBarToBottom<scrollAreaHeight)
-                {
-                    scrollBarDOM.setAttribute('style',
-                    'position: absolute; ' +
-                    'left:' + scrollBarOffsetLeft + 'px;' +
-                    'bottom:' + (scrollBarToBottom+120) + 'px;' +
-                    'width:' + scrollBarWidth + 'px;' +
-                    'height:' + scrollBarHeight + 'px;' +
-                    'background-color: red;');
-                    scrollBarDOM.setAttribute('class', 'scrollBar')
-                    scrollArea.appendChild(scrollBarDOM);
-                }
-            }
+            addAScrollBar(keyDOM);
         }
         else
         { // folded mode
-
+            let isSharp = false;
+            let isHigh = false;
+            let isLow = false;
+            if(midi-do1<0)
+            {
+                isLow = true;
+                midi += 12;
+            }
+            else if(midi-do1>12)
+            {
+                isHigh = true;
+                midi -= 12;
+            }
+            for(let key in ControllerModeTemplate)
+            {
+                if(do1+ControllerModeTemplate[key]===midi)
+                {
+                    keyDOM = Keys[key];
+                    break;
+                }
+            }
+            if(keyDOM==null)
+            {
+                isSharp = true;
+                for(let key in ControllerModeTemplate)
+                {
+                    if(do1+ControllerModeTemplate[key]+1===midi)
+                    {
+                        keyDOM = Keys[key];
+                        break;
+                    }
+                }
+            }
+            addAScrollBar(keyDOM);
+            if(isSharp)
+                addAScrollBar(Keys['sharp']);
+            if(isHigh)
+                addAScrollBar(Keys['high']);
+            if(isLow)
+                addAScrollBar(Keys['low']);
         }
     }
 }
