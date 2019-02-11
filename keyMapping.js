@@ -52,7 +52,7 @@ function createInputInTableData(note, defaultKey) {
         whichInputDOMIsWaitingAKey.setAttribute('value', event.key);
 
         let titleAreaDOM = document.getElementById('titleArea');
-        titleAreaDOM.innerText = 'Key Mapping';
+        titleAreaDOM.innerText = language.keyMapping;
 
         document.removeEventListener('keydown', tempOncePressKeyboard);
         whichInputDOMIsWaitingAKey = null;
@@ -62,7 +62,7 @@ function createInputInTableData(note, defaultKey) {
         if(whichInputDOMIsWaitingAKey!=null)
             return;
         let titleAreaDOM = document.getElementById('titleArea');
-        titleAreaDOM.innerText = 'Press your key...';
+        titleAreaDOM.innerText = language.pressYourKey;
         document.addEventListener('keydown', tempOncePressKeyboard);
         whichInputDOMIsWaitingAKey = event.target;
         whichNote = whichInputDOMIsWaitingAKey.getAttribute('id');

@@ -84,7 +84,7 @@ function creatPerformanceWindow(frameless)
     if(frameless)
         performanceWindow = new BrowserWindow({width:600, height: 150, transparent: true, frame: false, alwaysOnTop: true});
     else
-        performanceWindow = new BrowserWindow({width:600, height:150});
+        performanceWindow = new BrowserWindow({width:600, height: 200});
     performanceWindow.loadFile('performance.html');
     const performanceMenuTemplate = [];
     for(let i=0; i<appMenuTemplate.length; i++)
@@ -121,8 +121,7 @@ function creatPerformanceWindow(frameless)
     performanceMenu.append(new MenuItem({
     label: language.keyMapping,
     click(){
-        // keyMappingWindow = new BrowserWindow({width:400, height:300, parent: performanceWindow});
-        keyMappingWindow = new BrowserWindow({width:600, height:400});
+        keyMappingWindow = new BrowserWindow({width:600, height:400, parent: performanceWindow, autoHideMenuBar: true});
         keyMappingWindow.loadFile('keyMapping.html');
         keyMappingWindow.on('close',(event)=>{
             event.preventDefault();

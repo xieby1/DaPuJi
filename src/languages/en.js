@@ -5,6 +5,7 @@ module.exports.language = {
     saveAlert: 'Save current file?',
     yes: 'yes',
     no: 'no',
+    pressYourKey: 'press your key ...',
 
 
     // 主菜单相关 menu
