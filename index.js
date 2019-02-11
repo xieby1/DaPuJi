@@ -66,7 +66,7 @@ editor.on('change', ()=>{
     drawDisplayArea();
 });
 
-document.title = 'Notepad - Untitled'; // 设置文档标题，影响窗口标题栏名称
+document.title = language.appName + ' - ' + language.untitled; // 设置文档标题，影响窗口标题栏名称
 
 // 给文本框增加右键菜单
 const contextMenuTemplate = [
