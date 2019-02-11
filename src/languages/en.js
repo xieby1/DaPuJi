@@ -29,6 +29,7 @@ module.exports.language = {
     copy: 'Copy',
     paste: 'Paste',
     selectall: 'Select All',
+    keyMapping: 'Key Mappings',
 
     reload: 'Reload',
     toggledevtools: 'DevTools',

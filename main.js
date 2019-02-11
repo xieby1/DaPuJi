@@ -5,7 +5,7 @@ const {language} = require('./src/languages/selected');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow, performanceWindow;
+let mainWindow, performanceWindow, keyMappingWindow;
 
 function createWindow () {
     // Create the browser window.
@@ -82,7 +82,14 @@ function creatPerformanceWindow(frameless)
     else
         performanceWindow = new BrowserWindow({width:600, height:150});
     performanceWindow.loadFile('performance.html');
-    const performanceMenu = Menu.buildFromTemplate(appMenuTemplate);
+    const performanceMenuTemplate = [];
+    for(let i=0; i<appMenuTemplate.length; i++)
+    {
+        if(i===1)
+            continue;
+        performanceMenuTemplate.push(appMenuTemplate[i]);
+    }
+    const performanceMenu = Menu.buildFromTemplate(performanceMenuTemplate);
     performanceMenu.items[0].submenu.append(new MenuItem({
         label: language.switchMode,
         accelerator: 'CmdOrCtrl+m',
@@ -107,6 +114,15 @@ function creatPerformanceWindow(frameless)
             performanceWindow.webContents.send('action', 'start');
         }
     }));
+    performanceMenu.append(new MenuItem({
+    label: language.keyMapping,
+    click(){
+        // keyMappingWindow = new BrowserWindow({width:400, height:300, parent: performanceWindow});
+        keyMappingWindow = new BrowserWindow({width:400, height:300});
+        keyMappingWindow.loadFile('keyMapping.html');
+    },
+    accelerator: 'CmdOrCtrl+N' //快捷键：Ctrl+N
+}));
     performanceWindow.setMenu(performanceMenu);
     performanceWindow.on('closed', function () {
         performanceWindow = null

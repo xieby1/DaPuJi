@@ -136,29 +136,29 @@ function connectHandler(e) {
 function disconnectHandler(e) {
     delete controllers[e.gamepad.index];
 }
-const ControllerTemplate = {
-    LT: 'low', LB: 'flat', RB: 'sharp', RT: 'high',
-    L: 'do', U: 're', R: 'mi', D: 'fa',
-    X: 'so', Y: 'la', B: 'si', A: 'dd'
-};
+let ControllerTemplate;
 
 switchToFoldedMode();
 refreshControllerButtonTag();
 
 const ControllerPress = {};
 const ControllerRelease = {};
-for(let key in ControllerTemplate)
-{
-    ControllerPress[key] = ()=>{
-        if(InstrumentLayoutStatus.keyboardOrController)
-        {
-            refreshControllerButtonTag();
-            InstrumentLayoutStatus.keyboardOrController = false;
-        }
-        FuncPress[ControllerTemplate[key]]();
-    };
-    ControllerRelease[key] = FuncRelease[ControllerTemplate[key]];
+function refreshControllerButtonMapping() {
+    for(let key in ControllerTemplate)
+    {
+        ControllerTemplate = require('./src/settings/keyMappingSetting').keyMapping.controller;
+        ControllerPress[key] = ()=>{
+            if(InstrumentLayoutStatus.keyboardOrController)
+            {
+                refreshControllerButtonTag();
+                InstrumentLayoutStatus.keyboardOrController = false;
+            }
+            FuncPress[ControllerTemplate[key]]();
+        };
+        ControllerRelease[key] = FuncRelease[ControllerTemplate[key]];
+    }
 }
+refreshControllerButtonMapping();
 
 const ControllerPreFlags = {}; // 上一次刷新各个按键的状态。true：按下状态，false：松开状态
 const ControllerCurFlags = {}; // 本次刷新时各个按键的状态。
@@ -219,24 +219,12 @@ if (!haveEvents) {
 // 以上为手柄相关
 // 以下为键盘相关
 // creatAKeyBoardAction
-function cKA(key, code) {
-    return {key: key, code: code};
+let KeyboardAction;
+function refreshKeyboardMapping()
+{
+    KeyboardAction = require('./src/settings/keyMappingSetting').keyMapping.keyboard;
 }
-
-const KeyboardAction = {
-    low: cKA('Shift', 'ShiftLeft'),
-    high: cKA('Ctrl', 'ControlLeft'),
-    do: cKA('q', 'KeyQ'), re: cKA('w', 'KeyW'),
-    mi: cKA('e', 'KeyE'), fa: cKA('r', 'KeyR'),
-    so: cKA('t', 'KeyT'), la: cKA('y', 'KeyY'),
-    si: cKA('u', 'KeyU'), dd: cKA('i', 'KeyI'),
-    doS:cKA('2', 'Digit2'),reS:cKA('3','Digit3'),
-    faS:cKA('5', 'Digit5'),soS:cKA('6', 'Digit6'),
-    laS:cKA('7', 'Digit7')
-};
-for(let key in KeyboardModeTemplate)
-    if(!(key in KeyboardAction))
-        KeyboardAction[key] = cKA('', '');
+refreshKeyboardMapping();
 
 document.addEventListener('keydown', (e)=>{
     if(!InstrumentLayoutStatus.keyboardOrController)

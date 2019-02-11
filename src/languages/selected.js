@@ -29,6 +29,7 @@ module.exports.language = {
     copy: '复制',
     paste: '粘贴',
     selectall: '全选',
+    keyMapping: '键位设置',
 
     reload: '重载',
     toggledevtools: '开发人员工具',
