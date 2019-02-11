@@ -136,13 +136,14 @@ function connectHandler(e) {
 function disconnectHandler(e) {
     delete controllers[e.gamepad.index];
 }
-let ControllerTemplate;
+let ControllerTemplate = require('./src/settings/keyMappingSetting').keyMapping.controller;
 
 switchToFoldedMode();
 refreshControllerButtonTag();
 
 const ControllerPress = {};
 const ControllerRelease = {};
+
 function refreshControllerButtonMapping() {
     for(let key in ControllerTemplate)
     {
@@ -157,6 +158,7 @@ function refreshControllerButtonMapping() {
         };
         ControllerRelease[key] = FuncRelease[ControllerTemplate[key]];
     }
+    refreshControllerButtonTag();
 }
 refreshControllerButtonMapping();
 

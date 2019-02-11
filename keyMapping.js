@@ -196,14 +196,37 @@ ipcRenderer.on('action', (event, arg)=>{
             {
                 let fileAddress = './src/settings/keyMappingSetting.js';
                 let keyMappingText = 'module.exports.keyMapping = {\n controller: ';
-                keyMappingText += ControllerMapping.valueOf() + ',\n';
+                keyMappingText += ControllerMappingToString() + ',\n';
                 keyMappingText += 'keyboard: ';
-                keyMappingText += KeyboardMapping + '};';
+                keyMappingText += KeyboardMappingToString() + '};';
                 const fs = require('fs');
                 fs.writeFileSync(fileAddress, keyMappingText);
             }
-            // ipcRenderer.send('keyMappingAction', 'destroy');
+            ipcRenderer.send('keyMappingAction', 'destroy');
             break;
         default:
     }
 });
+
+
+function ControllerMappingToString() {
+    let result = '{\n';
+    for(let key in ControllerMapping)
+    {
+        let note = ControllerMapping[key];
+        result += key + ': "' + note + '",\n'
+    }
+    result += '}';
+    return result;
+}
+
+function KeyboardMappingToString() {
+    let result = '{\n';
+    for(let note in KeyboardMapping)
+    {
+        let obj = KeyboardMapping[note];
+        result += note + ': {key: "' + obj.key + '", code: "' + obj.code + '"},\n';
+    }
+    result += '}';
+    return result;
+}
