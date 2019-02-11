@@ -1,10 +1,12 @@
+const path = require('path');
 const FOLDEDKEYWIDTH = 100/12;
 const WHITEKEYWIDTH = 100/26;
 const BLACKKEYWIDTH = 2;
 
 let player;
 const audioContext = new AudioContext();
-Soundfont.instrument(audioContext, 'acoustic_grand_piano').then(function (p) {player=p;});
+Soundfont.instrument(audioContext,
+    path.join(__dirname,'lib', 'instruments', 'acoustic_grand_piano-mp3.js'),{}).then(function (p) {player=p;});
 const SIDEKEY = 'sideKey'; const PRESS = ' press'; const MAINKEY = 'mainKey'; const BLACKKEY  = 'blackKey'
 let quiteMode = false; // true：松开按键时音会停掉（笛子小提琴等），false：松开按键时音会一直延续（钢琴等）
 let do1 = 60; // do对应的midi-number

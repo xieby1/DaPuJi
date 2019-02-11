@@ -1,6 +1,7 @@
 const { ipcRenderer, remote} = require('electron');
 const { Menu, MenuItem, dialog } = remote;
 const Katex = require('katex');
+const path = require('path');
 const {replaceWithLatex} = require('./src/functions/preprocessNotes');
 const {getPlayEvents} = require('./src/functions/SoundfontEventsProvider');
 const {parseHead} = require('./src/functions/header');
@@ -27,7 +28,7 @@ const editor = CodeMirror(editArea, {
 
 let player;
 const audioContext = new AudioContext();
-Soundfont.instrument(audioContext, 'acoustic_grand_piano').then(function (playerReady) {
+Soundfont.instrument(audioContext, path.join(__dirname, 'lib', 'instruments','acoustic_grand_piano-mp3.js'),{}).then(function (playerReady) {
     player = playerReady;
 });
 
