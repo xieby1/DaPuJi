@@ -36,11 +36,9 @@ Soundfont.instrument(audioContext, path.join(__dirname, 'lib', 'instruments','ac
     player = playerReady;
 });
 
-editor.on('change', (cm)=>{
-    if(isSaved)
-        document.title += ' *';
-    isSaved = false;
-    let content = cm.getValue();
+function drawDisplayArea()
+{
+    let content = editor.getValue();
     let headInfo = parseHead(content);
     title.innerText = headInfo.title;
     composer.innerText = headInfo.composer;
@@ -57,6 +55,15 @@ editor.on('change', (cm)=>{
             newKatex_htmlContent += base.innerHTML;
         katex_html.innerHTML = newKatex_htmlContent;
     }
+}
+
+drawDisplayArea();
+
+editor.on('change', ()=>{
+    if(isSaved)
+        document.title += ' *';
+    isSaved = false;
+    drawDisplayArea();
 });
 
 document.title = 'Notepad - Untitled'; // 设置文档标题，影响窗口标题栏名称
