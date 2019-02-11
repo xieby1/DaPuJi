@@ -8,7 +8,7 @@ let mainWindow, performanceWindow;
 
 function createWindow () {
     // Create the browser window.
-    mainWindow = new BrowserWindow({width: 800, height: 600})
+    mainWindow = new BrowserWindow({width: 800, height: 600});
 
     // and load the index.html of the app.
     mainWindow.loadFile('index.html');
@@ -28,7 +28,14 @@ function createWindow () {
         label: 'Perform',
         accelerator:'CmdOrCtrl+p',
         click(){
-            creatPerformanceWindow();
+            creatPerformanceWindow(false);
+        }
+    }));
+    mainMenu.items[0].submenu.append(new MenuItem({
+        label: 'Frameless Perform',
+        accelerator:'CmdOrCtrl+Alt+p',
+        click(){
+            creatPerformanceWindow(true);
         }
     }));
     mainWindow.setMenu(mainMenu);
@@ -42,9 +49,12 @@ function createWindow () {
     })
 }
 
-function creatPerformanceWindow(menu)
+function creatPerformanceWindow(frameless)
 {
-    performanceWindow = new BrowserWindow({width:600, height:300});
+    if(frameless)
+        performanceWindow = new BrowserWindow({width:600, height: 150, transparent: true, frame: false, alwaysOnTop: true});
+    else
+        performanceWindow = new BrowserWindow({width:600, height:150});
     performanceWindow.loadFile('performance.html');
     const performanceMenu = Menu.buildFromTemplate(appMenuTemplate);
     performanceMenu.items[0].submenu.append(new MenuItem({
@@ -114,6 +124,8 @@ ipcMain.on('performanceAction', (event, arg)=>{
 });
 
 ipcMain.on('notesPrepared', (event, notes)=>{
+    performanceWindow.setBounds({height: 600});
+    performanceWindow.center();
     performanceWindow.webContents.send('notes', notes);
 });
 

@@ -61,6 +61,8 @@ function drawScrollArea(relativeTime){
         { // full mode
             for(let key in KeyboardModeTemplate)
             {
+                if(KeyboardModeTemplate[key]==null)
+                    continue;
                 if(do1+KeyboardModeTemplate[key]===midi)
                 {
                     keyDOM = Keys[key];
@@ -86,6 +88,8 @@ function drawScrollArea(relativeTime){
             }
             for(let key in ControllerModeTemplate)
             {
+                if(ControllerModeTemplate[key]==null)
+                    continue;
                 if(do1+ControllerModeTemplate[key]===midi)
                 {
                     keyDOM = Keys[key];
@@ -95,8 +99,11 @@ function drawScrollArea(relativeTime){
             if(keyDOM==null)
             {
                 isSharp = true;
+
                 for(let key in ControllerModeTemplate)
                 {
+                    if(ControllerModeTemplate[key]==null)
+                        continue;
                     if(do1+ControllerModeTemplate[key]+1===midi)
                     {
                         keyDOM = Keys[key];
