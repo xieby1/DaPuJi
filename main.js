@@ -72,6 +72,10 @@ function createWindow () {
         // in an array if your app supports multi windows, this is the time
         // when you should delete the corresponding element.
         mainWindow = null
+    });
+    mainWindow.on('close', function (event) {
+        event.preventDefault();
+        mainWindow.webContents.send('action', 'closing');
     })
 }
 
@@ -123,6 +127,9 @@ function creatPerformanceWindow(frameless)
         keyMappingWindow.on('close',(event)=>{
             event.preventDefault();
             keyMappingWindow.webContents.send('action', 'closing');
+        });
+        keyMappingWindow.on('closed',(event)=>{
+            keyMappingWindow = null;
         })
     },
     accelerator: 'CmdOrCtrl+N' //快捷键：Ctrl+N
@@ -181,6 +188,16 @@ ipcMain.on('keyMappingAction', (event, arg)=>{
             keyMappingWindow.destroy();
             keyMappingWindow = null;
             performanceWindow.webContents.send('action', 'refreshKeyMapping');
+            break;
+        default:
+    }
+});
+
+ipcMain.on('mainWindowAction', (event, arg)=>{
+    switch (arg) {
+        case 'destroy':
+            mainWindow.destroy();
+            mainWindow = null;
             break;
         default:
     }

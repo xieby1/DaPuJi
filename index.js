@@ -124,16 +124,12 @@ ipcRenderer.on('action', (event, arg) => {
         case 'save': // 保存文件
             saveCurrentDoc();
             break;
+        case 'closing':
+            askSaveIfNeed();
+            ipcRenderer.send('mainWindowAction', 'destroy');
+            break;
         default:
     }
-    // switch (arg) {
-    //
-    //
-    //     case 'exiting':
-    //         askSaveIfNeed();
-    //         ipcRenderer.sendSync('reqaction', 'exit');
-    //         break;
-    // }
 });
 
 // 读取文本文件
