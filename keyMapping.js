@@ -1,3 +1,7 @@
+const { ipcRenderer, remote} = require('electron');
+const { dialog } = remote;
+const {language} = require('./src/languages/selected');
+
 let isSaved = true;
 const ControllerModeTemplate = require('./src/settings/template').ControllerMode;
 const KeyboardBlackTemplate = require('./src/settings/template').KeyboardBlack;
@@ -12,11 +16,102 @@ const ControllerMapping = require('./src/settings/keyMappingSetting').keyMapping
 const noneNote = {low: null, flat: null, sharp:null, high:null};
 
 // keyboard
-function createInputInTableData(note, keyName) {
+let whichInputDOMIsWaitingAKey = null;
+let whichNote = null;
+// actually it is a button
+function createInputInTableData(note, defaultKey) {
     let tempInput = document.createElement('input');
     tempInput.setAttribute('id', note);
-    tempInput.setAttribute('maxlength', '1');
+    tempInput.setAttribute('type', 'button');
+    tempInput.setAttribute('value', defaultKey);
+    function tempOncePressKeyboard(event){
+        // 交换可能存在的冲突键和本次修改的按键之前的值
+        // 寻找是否存在冲突按键
+        let conflictNote;
+        let conflictInputDOM;
+        for(let note in KeyboardMapping)
+        {
+            if(event.code === KeyboardMapping[note].code)
+            {
+                conflictNote = note;
+                conflictInputDOM = document.getElementById(note);
+                break;
+            }
+        }
+        // 如果存在冲突按键
+        if(conflictInputDOM!=null)
+        {
+            // 交换冲突键和当前按键原来的值
+            KeyboardMapping[conflictNote].key = KeyboardMapping[whichNote].key;
+            KeyboardMapping[conflictNote].code = KeyboardMapping[whichNote].code;
+            conflictInputDOM.setAttribute('value', KeyboardMapping[whichNote].key);
+        }
 
+        KeyboardMapping[whichNote].key = event.key;
+        KeyboardMapping[whichNote].code = event.code;
+        whichInputDOMIsWaitingAKey.setAttribute('value', event.key);
+
+        let titleAreaDOM = document.getElementById('titleArea');
+        titleAreaDOM.innerText = 'Key Mapping';
+
+        document.removeEventListener('keydown', tempOncePressKeyboard);
+        whichInputDOMIsWaitingAKey = null;
+        whichNote = null;
+    }
+    tempInput.addEventListener('click', (event)=>{
+        if(whichInputDOMIsWaitingAKey!=null)
+            return;
+        let titleAreaDOM = document.getElementById('titleArea');
+        titleAreaDOM.innerText = 'Press your key...';
+        document.addEventListener('keydown', tempOncePressKeyboard);
+        whichInputDOMIsWaitingAKey = event.target;
+        whichNote = whichInputDOMIsWaitingAKey.getAttribute('id');
+    });
+    let inputWithName = document.createElement('td');
+    inputWithName.innerText = note + ':';
+    inputWithName.appendChild(tempInput);
+
+    return inputWithName;
+}
+
+// white keys
+let tempLength = [9, 8, 9];
+let tempRow = 0;
+let tempCol = 0;
+let keyboardTableRow;
+for(let note in KeyboardWhiteTemplate)
+{
+    if(tempRow===0)
+        keyboardTableRow = document.createElement('tr');
+
+    keyboardTableRow.appendChild(createInputInTableData(note, KeyboardMapping[note].key));
+
+    tempRow++;
+    if(tempLength[tempCol]===tempRow)
+    {
+        keyboardSettingDOM.appendChild(keyboardTableRow);
+        tempRow = 0;
+        tempCol++;
+    }
+}
+// black keys
+tempLength = [5, 5, 5];
+tempRow = 0;
+tempCol = 0;
+for(let note in KeyboardBlackTemplate)
+{
+    if(tempRow===0)
+        keyboardTableRow = document.createElement('tr');
+
+    keyboardTableRow.appendChild(createInputInTableData(note, KeyboardMapping[note].key));
+
+    tempRow++;
+    if(tempLength[tempCol]===tempRow)
+    {
+        keyboardSettingDOM.appendChild(keyboardTableRow);
+        tempRow = 0;
+        tempCol++;
+    }
 }
 // end of keyboard
 
@@ -88,3 +183,27 @@ for(let button in ControllerMapping)
     tempCounter++;
 }
 // end of controller
+
+ipcRenderer.on('action', (event, arg)=>{
+    switch (arg) {
+        case 'closing':
+            const response = dialog.showMessageBox(remote.getCurrentWindow(), {
+                message: language.saveAlert,
+                type: 'question',
+                buttons: [language.yes, language.no],
+            });
+            if (response === 0)
+            {
+                let fileAddress = './src/settings/keyMappingSetting.js';
+                let keyMappingText = 'module.exports.keyMapping = {\n controller: ';
+                keyMappingText += ControllerMapping.valueOf() + ',\n';
+                keyMappingText += 'keyboard: ';
+                keyMappingText += KeyboardMapping + '};';
+                const fs = require('fs');
+                fs.writeFileSync(fileAddress, keyMappingText);
+            }
+            // ipcRenderer.send('keyMappingAction', 'destroy');
+            break;
+        default:
+    }
+});

@@ -296,6 +296,10 @@ ipcRenderer.on('action', (event, arg) => {
                 drawScrollArea((new Date()).getTime()-startTime-aheadOfTime);
             };
             break;
+        case 'refreshKeyMapping':
+            refreshControllerButtonMapping();
+            refreshKeyboardMapping();
+            break;
         default:
     }
 });

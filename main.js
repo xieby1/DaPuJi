@@ -118,8 +118,12 @@ function creatPerformanceWindow(frameless)
     label: language.keyMapping,
     click(){
         // keyMappingWindow = new BrowserWindow({width:400, height:300, parent: performanceWindow});
-        keyMappingWindow = new BrowserWindow({width:400, height:300});
+        keyMappingWindow = new BrowserWindow({width:600, height:400});
         keyMappingWindow.loadFile('keyMapping.html');
+        keyMappingWindow.on('close',(event)=>{
+            event.preventDefault();
+            keyMappingWindow.webContents.send('action', 'closing');
+        })
     },
     accelerator: 'CmdOrCtrl+N' //快捷键：Ctrl+N
 }));
@@ -169,6 +173,17 @@ ipcMain.on('notesPrepared', (event, notes)=>{
     performanceWindow.setBounds({height: 600});
     performanceWindow.center();
     performanceWindow.webContents.send('notes', notes);
+});
+
+ipcMain.on('keyMappingAction', (event, arg)=>{
+    switch (arg) {
+        case 'destroy':
+            keyMappingWindow.destroy();
+            keyMappingWindow = null;
+            performanceWindow.webContents.send('action', 'refreshKeyMapping');
+            break;
+        default:
+    }
 });
 
 // In this file you can include the rest of your app's specific main process
