@@ -1,6 +1,6 @@
 {
   "name": "DaPuJi",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Write, Play and Perform a piece of music",
   "main": "main.js",
   "scripts": {
