@@ -1,6 +1,7 @@
 const { ipcRenderer} = require('electron');
 const {getPlayEvents} = require('./src/functions/SoundfontEventsProvider');
 const {parseHead} = require('./src/functions/header');
+const {language} = require('./src/languages/selected');
 // true-left, false-right
 const InstrumentLayoutStatus = {fullOrFolded: false, keyboardOrController: false};
 

@@ -1,6 +1,7 @@
 // Modules to control application life and create native browser window
 const {app, BrowserWindow, Menu, MenuItem, ipcMain} = require('electron');
 const {appMenuTemplate} = require('./src/appmenu');
+const {language} = require('./src/languages/selected');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -17,7 +18,7 @@ function createWindow () {
     // mainWindow.webContents.openDevTools()
     const mainMenu = Menu.buildFromTemplate(appMenuTemplate);
     mainMenu.items[0].submenu.append(new MenuItem({ //menu.items获取是的主菜单一级菜单的菜单数组，menu.items[0]在这里就是第1个File菜单对象，在其子菜单submenu中添加新的子菜单
-        label: "New",
+        label: language.new,
         click(){
             mainWindow.webContents.send('action', 'new'); //点击后向主页渲染进程发送“新建文件”的命令
         },
@@ -25,7 +26,7 @@ function createWindow () {
     }));
     //在New菜单后面添加名为Open的同级菜单
     mainMenu.items[0].submenu.append(new MenuItem({
-        label: "Open",
+        label: language.open,
         click(){
             mainWindow.webContents.send('action', 'open'); //点击后向主页渲染进程发送“打开文件”的命令
         },
@@ -33,7 +34,7 @@ function createWindow () {
     }));
     //再添加一个名为Save的同级菜单
     mainMenu.items[0].submenu.append(new MenuItem({
-        label: "Save",
+        label: language.save,
         click(){
             mainWindow.webContents.send('action', 'save'); //点击后向主页渲染进程发送“保存文件”的命令
         },
@@ -43,21 +44,21 @@ function createWindow () {
         type: 'separator'
     }));
     mainMenu.items[0].submenu.append(new MenuItem({
-        label: 'Play',
+        label: language.play,
         accelerator:'CmdOrCtrl+Shift+p',
         click: ()=>{
             mainWindow.webContents.send('action', 'play');
         }
     }));
     mainMenu.items[0].submenu.append(new MenuItem({
-        label: 'Perform',
+        label: language.perform,
         accelerator:'CmdOrCtrl+p',
         click(){
             creatPerformanceWindow(false);
         }
     }));
     mainMenu.items[0].submenu.append(new MenuItem({
-        label: 'Frameless Perform',
+        label: language.framelessPerform,
         accelerator:'CmdOrCtrl+Alt+p',
         click(){
             creatPerformanceWindow(true);
@@ -83,7 +84,7 @@ function creatPerformanceWindow(frameless)
     performanceWindow.loadFile('performance.html');
     const performanceMenu = Menu.buildFromTemplate(appMenuTemplate);
     performanceMenu.items[0].submenu.append(new MenuItem({
-        label: 'Switch Mode',
+        label: language.switchMode,
         accelerator: 'CmdOrCtrl+m',
         click: ()=>{
             performanceWindow.webContents.send('action', 'switchMode');
@@ -93,14 +94,14 @@ function creatPerformanceWindow(frameless)
         type: 'separator'
     }));
     performanceMenu.items[0].submenu.append(new MenuItem({
-        label: 'Aid Perform',
+        label: language.aidPerform,
         accelerator: 'CmdOrCtrl+p',
         click: ()=>{
             mainWindow.webContents.send('action', 'prepareAidPerform');
         }
     }));
     performanceMenu.items[0].submenu.append(new MenuItem({
-        label: 'Start',
+        label: language.start,
         accelerator: 'CmdOrCtrl+s',
         click: ()=>{
             performanceWindow.webContents.send('action', 'start');

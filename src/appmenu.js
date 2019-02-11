@@ -1,80 +1,78 @@
 const electron = require('electron');
+const {language} = require('./languages/selected');
 
 module.exports.appMenuTemplate = [
   {
-    label: 'File',
+    label: language.file,
     submenu: [],
   },
   {
-    label: 'Edit',
+    label: language.edit,
     submenu: [
       {
+        label: language.undo,
         role: 'undo',
       },
       {
-        role: 'redo',
-      },
-      {
-        type: 'separator',
-      },
-      {
+        label: language.cut,
         role: 'cut',
       },
       {
+        label: language.copy,
         role: 'copy',
       },
       {
+        label: language.paste,
         role: 'paste',
       },
       {
-        role: 'pasteandmatchstyle',
-      },
-      {
-        role: 'delete',
-      },
-      {
+        label: language.selectall,
         role: 'selectall',
       },
     ],
   },
   {
-    label: 'View',
+    label: language.view,
     submenu: [
       {
+        label: language.reload,
         role: 'reload',
       },
       {
-        role: 'forcereload',
-      },
-      {
+        label: language.toggledevtools,
         role: 'toggledevtools',
       },
       {
         type: 'separator',
       },
       {
+        label: language.resetzoom,
         role: 'resetzoom',
       },
       {
+        label: language.zoomin,
         role: 'zoomin',
       },
       {
+      label: language.zoomout,
         role: 'zoomout',
       },
       {
         type: 'separator',
       },
       {
+        label: language.togglefullscreen,
         role: 'togglefullscreen',
       },
     ],
   },
   {
+    label: language.help,
     role: 'help',
     submenu: [
       {
-        label: 'Home Page',
-        click() { electron.shell.openExternal('http://www.jianshu.com/u/a7454e40399d'); },
+        label: language.homePage,
+        click() { electron.shell.openExternal('https://github.com/xieby1/DaPuJi'); },
       },
     ],
   },

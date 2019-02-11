@@ -21,6 +21,12 @@ $ npm start
 
 打包好的程序将在0.1.0版本后开始提供。当然你若需要打包好的程序，可以用[electron-packager](https://github.com/electron-userland/electron-packager)自行打包。
 
+### 语言切换
+
+将```src/languages/```目录，需要调用的语言的文件名改为```seleted.js```即可。
+
+例如：默认的```seleted.js```里为中文，若要换成英文，则将原本的```seleted.js```删除，将```en.js```改名为```seleted.js```重启程序即可。
+
 ## 功能
 
 功能的实现详细情况见```functionality.md```文件。

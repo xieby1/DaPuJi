@@ -16,7 +16,6 @@
     "electron": "4.0.3"
   },
   "dependencies": {
-    "katex": "0.10.0",
-    "soundfont-player": "latest"
+    "katex": "0.10.0"
   }
 }

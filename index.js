@@ -5,6 +5,7 @@ const path = require('path');
 const {replaceWithLatex} = require('./src/functions/preprocessNotes');
 const {getPlayEvents} = require('./src/functions/SoundfontEventsProvider');
 const {parseHead} = require('./src/functions/header');
+const {language} = require('./src/languages/selected');
 
 const editArea = document.getElementById('editArea');
 const title = document.getElementById('title');
@@ -62,15 +63,11 @@ document.title = 'Notepad - Untitled'; // 设置文档标题，影响窗口标�
 
 // 给文本框增加右键菜单
 const contextMenuTemplate = [
-    { role: 'undo' },       // Undo菜单项
-    { role: 'redo' },       // Redo菜单项
-    { type: 'separator' },  // 分隔线
-    { role: 'cut' },        // Cut菜单项
-    { role: 'copy' },       // Copy菜单项
-    { role: 'paste' },      // Paste菜单项
-    { role: 'delete' },     // Delete菜单项
-    { type: 'separator' },  // 分隔线
-    { role: 'selectall' },   // Select All菜单项
+    { label: language.undo, role: 'undo' },
+    { label: language.cut, role: 'cut' },
+    { label: language.copy, role: 'copy' },
+    { label: language.paste, role: 'paste' },
+    { label: language.selectall, role: 'selectall' }
 ];
 const contextMenu = Menu.buildFromTemplate(contextMenuTemplate);
 document.getElementById('body').addEventListener('contextmenu', (e) => {
@@ -97,8 +94,8 @@ ipcRenderer.on('action', (event, arg) => {
             askSaveIfNeed();
             currentFile = null;
             editor.setValue('');
-            document.title = 'Dapuji - Untitled';
-            // remote.getCurrentWindow().setTitle("Notepad - Untitled *");
+            document.title = language.appName + ' - ' + language.untitled;
+            // remote.getCurrentWindow().setTitle(language.appName + ' - ' + language.untitled + ' *');
             isSaved = true;
             break;
         case 'open': // 打开文件
@@ -113,7 +110,7 @@ ipcRenderer.on('action', (event, arg) => {
                 currentFile = files[0];
                 const txtRead = readText(currentFile);
                 editor.setValue(txtRead);
-                document.title = `Dapuji - ${currentFile}`;
+                document.title = `${language.appName} - ${currentFile}`;
                 isSaved = true;
             }
             break;
@@ -157,7 +154,7 @@ function saveCurrentDoc() {
         const txtSave = editor.getValue();
         saveText(txtSave, currentFile);
         isSaved = true;
-        document.title = `Dapuji - ${currentFile}`;
+        document.title = `${language.appName} - ${currentFile}`;
     }
 }
 
@@ -165,9 +162,9 @@ function saveCurrentDoc() {
 function askSaveIfNeed() {
     if (isSaved) return;
     const response = dialog.showMessageBox(remote.getCurrentWindow(), {
-        message: 'Do you want to save the current document?',
+        message: language.saveAlert,
         type: 'question',
-        buttons: ['Yes', 'No'],
+        buttons: [language.yes, language.no],
     });
     if (response === 0) saveCurrentDoc(); // 点击Yes按钮后保存当前文档
 }
