@@ -21,7 +21,9 @@ $ npm start
 
 ### 直接下载打包好的程序
 
-打包好的程序将在0.1.0版本后开始提供。当然你若需要打包好的程序，可以用[electron-packager](https://github.com/electron-userland/electron-packager)自行打包。
+[百度网盘下载提取码：adsg](https://pan.baidu.com/s/1mMlta4AeOBzUCEECWH0PNQ)
+
+当然你若需要自己打包的话想要在Windows以外的系统运行（比如linux、OSX），可以用[electron-packager](https://github.com/electron-userland/electron-packager)。
 
 ### 语言切换
 
