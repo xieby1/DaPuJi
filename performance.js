@@ -1,4 +1,4 @@
-const { ipcRenderer} = require('electron');
+const { ipcRenderer, remote } = require('electron');
 const {getPlayEvents} = require('./src/functions/SoundfontEventsProvider');
 const {parseHead} = require('./src/functions/header');
 const {language} = require('./src/languages/selected');
@@ -18,6 +18,20 @@ function startScrollAreaLoop() {
     requestAnimationFrame(startScrollAreaLoop);
 }
 const scrollArea = document.getElementById('scrollArea');
+scrollArea.setAttribute('draggable', 'true');
+let scrollAreaMoveX, scrollAreaMoveY;
+scrollArea.addEventListener('dragstart', (event)=>{
+    scrollAreaMoveX = event.screenX;
+    scrollAreaMoveY = event.screenY;
+});
+scrollArea.addEventListener('dragend', (event)=>{
+    scrollAreaMoveX -= event.screenX;
+    scrollAreaMoveY -= event.screenY;
+    let currentWindow = remote.getCurrentWindow();
+    let currentX = currentWindow.getPosition()[0];
+    let currentY = currentWindow.getPosition()[1];
+    currentWindow.setPosition(currentX-scrollAreaMoveX, currentY-scrollAreaMoveY);
+});
 function drawScrollArea(relativeTime){
     // 解除loop, 最后一个音的1.1倍时间后解除
     if(relativeTime > 1100*playEvents[playEvents.length-1].time)
@@ -301,6 +315,9 @@ ipcRenderer.on('action', (event, arg) => {
         case 'refreshKeyMapping':
             refreshControllerButtonMapping();
             refreshKeyboardMapping();
+            break;
+        case 'toggleMute':
+            toggleMute();
             break;
         default:
     }

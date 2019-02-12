@@ -105,6 +105,15 @@ function creatPerformanceWindow(frameless)
         type: 'separator'
     }));
     performanceMenu.items[0].submenu.append(new MenuItem({
+        label: language.mute,
+        type: 'checkbox',
+        checked: false,
+        accelerator: 'Shift+m',
+        click(){
+            performanceWindow.webContents.send('action', 'toggleMute');
+        },
+    }));
+    performanceMenu.items[0].submenu.append(new MenuItem({
         label: language.aidPerform,
         accelerator: 'CmdOrCtrl+p',
         click: ()=>{
@@ -119,20 +128,19 @@ function creatPerformanceWindow(frameless)
         }
     }));
     performanceMenu.append(new MenuItem({
-    label: language.keyMapping,
-    click(){
-        keyMappingWindow = new BrowserWindow({width:600, height:400, parent: performanceWindow, autoHideMenuBar: true});
-        keyMappingWindow.loadFile('keyMapping.html');
-        keyMappingWindow.on('close',(event)=>{
-            event.preventDefault();
-            keyMappingWindow.webContents.send('action', 'closing');
-        });
-        keyMappingWindow.on('closed',(event)=>{
-            keyMappingWindow = null;
-        })
-    },
-    accelerator: 'CmdOrCtrl+N' //快捷键：Ctrl+N
-}));
+        label: language.keyMapping,
+        click(){
+            keyMappingWindow = new BrowserWindow({width:600, height:400, parent: performanceWindow, autoHideMenuBar: true});
+            keyMappingWindow.loadFile('keyMapping.html');
+            keyMappingWindow.on('close',(event)=>{
+                event.preventDefault();
+                keyMappingWindow.webContents.send('action', 'closing');
+            });
+            keyMappingWindow.on('closed',(event)=>{
+                keyMappingWindow = null;
+            })
+        },
+    }));
     performanceWindow.setMenu(performanceMenu);
     performanceWindow.on('closed', function () {
         performanceWindow = null

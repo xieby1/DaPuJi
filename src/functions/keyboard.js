@@ -4,6 +4,7 @@ const WHITEKEYWIDTH = 100/26;
 const BLACKKEYWIDTH = 2;
 
 let player;
+let muted = false;
 const audioContext = new AudioContext();
 Soundfont.instrument(audioContext,
     path.join(__dirname,'lib', 'instruments', 'acoustic_grand_piano-mp3.js'),{}).then(function (p) {player=p;});
@@ -115,44 +116,51 @@ for(let key in ControllerModeTemplate)
 const FuncPress = {}; // 对应按键被按下时的动作
 const FuncRelease = {}; // 对应按键被松开时的动作
 // 因为ControllerModeTemplate是KeyboardModeTemplate的子集，所以对KeyboardMode包含的按键进行初始即包含了ControllerMode的按键
-for(let key in KeyboardModeTemplate)
-{
-    if(key==='low' || key==='flat' || key==='sharp' || key==='high')
+function refreshFuncPressRelease() {
+    for(let key in KeyboardModeTemplate)
     {
-        FuncPress[key] = ()=>{
-            Keys[key].className = SIDEKEY+PRESS;
-            KeyFlags[key] = true;
-        };
-        FuncRelease[key] = ()=>{
-            Keys[key].className = SIDEKEY;
-            KeyFlags[key] = false;
-        };
+        if(key==='low' || key==='flat' || key==='sharp' || key==='high')
+        {
+            FuncPress[key] = ()=>{
+                Keys[key].className = SIDEKEY+PRESS;
+                KeyFlags[key] = true;
+            };
+            FuncRelease[key] = ()=>{
+                Keys[key].className = SIDEKEY;
+                KeyFlags[key] = false;
+            };
+        }
+        else
+        {
+            FuncPress[key] = ()=>{
+                let midi = do1;
+                if(KeyFlags['low']) midi -= 12;
+                if(KeyFlags['high']) midi += 12;
+                if(KeyFlags['flat']) midi--;
+                if(KeyFlags['sharp']) midi++;
+                midi += KeyboardModeTemplate[key];
+                if(!KeyFlags[key] && !muted)
+                    player.play(midi);
+                if(Keys[key].className===MAINKEY || Keys[key].className===MAINKEY+PRESS)
+                    Keys[key].className = MAINKEY+PRESS;
+                else // black key
+                    Keys[key].className = BLACKKEY+PRESS;
+                KeyFlags[key] = true;
+            };
+            FuncRelease[key] = ()=>{
+                if(Keys[key].className===MAINKEY || Keys[key].className===MAINKEY+PRESS)
+                    Keys[key].className = MAINKEY;
+                else // black key
+                    Keys[key].className = BLACKKEY;
+                KeyFlags[key] = false;
+            };
+        }
     }
-    else
-    {
-        FuncPress[key] = ()=>{
-            let midi = do1;
-            if(KeyFlags['low']) midi -= 12;
-            if(KeyFlags['high']) midi += 12;
-            if(KeyFlags['flat']) midi--;
-            if(KeyFlags['sharp']) midi++;
-            midi += KeyboardModeTemplate[key];
-            if(!KeyFlags[key])
-                player.play(midi);
-            if(Keys[key].className===MAINKEY || Keys[key].className===MAINKEY+PRESS)
-                Keys[key].className = MAINKEY+PRESS;
-            else // black key
-                Keys[key].className = BLACKKEY+PRESS;
-            KeyFlags[key] = true;
-        };
-        FuncRelease[key] = ()=>{
-            if(Keys[key].className===MAINKEY || Keys[key].className===MAINKEY+PRESS)
-                Keys[key].className = MAINKEY;
-            else // black key
-                Keys[key].className = BLACKKEY;
-            KeyFlags[key] = false;
-        };
-    }
+}
+refreshFuncPressRelease();
+function toggleMute() {
+    muted = !muted;
+    refreshFuncPressRelease();
 }
 
 // 以下鼠标相关
