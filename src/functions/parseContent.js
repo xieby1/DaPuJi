@@ -1,0 +1,282 @@
+const LATEXBLANK = '\\ \\ ';
+
+class BeatInfo
+{
+    constructor(beatsNumber, baseBeat)
+    {
+        this.beatsNumber = beatsNumber;
+        this.baseBeat = baseBeat;// 表示四分音符为baseLength拍
+    }
+}
+
+class MusicalNote
+{
+    constructor(tone, step, length, height)
+    {
+        this.tone = tone;
+        this.step = step;
+        this.length = length;
+        this.height = height;
+    }
+}
+
+const LETTERNOTATION = [null, 60, 62, 64, 65, 67, 69, 71];
+class ParsedContent
+{
+    constructor(headInfo, bodyInfo)
+    {
+        this.headInfo = headInfo;
+        this.bodyInfo = bodyInfo;
+    }
+
+    getPlayEvents(){
+        let events = [];
+        let bpm = this.headInfo.bpm; // 每分钟拍数
+        let baseBeat = this.headInfo.beatInfo.baseBeat; // 表示四分音符为baseBeat拍
+        let timeAcc = 0; //累计时间
+
+        for(let lineInfo of this.bodyInfo)
+        {
+            for(let musicalNote of lineInfo)
+            {
+                let tone = musicalNote.tone;
+                let step = musicalNote.step;
+                let height = musicalNote.height;
+                let length = musicalNote.length;
+
+                events.push({time: timeAcc, note: LETTERNOTATION[tone]+height*12+step});
+                timeAcc += length*baseBeat/bpm*60;
+            }
+        }
+        return events;
+    }
+
+    getLatexBody(){
+        if(this.bodyInfo.length === 0)
+            return '';
+        let latexBody = [];
+        let filledLength = 0;
+
+        for(let lineInfo of this.bodyInfo)
+        {
+            let latexLine = '';
+            for(let musicalNote of lineInfo)
+            {
+                latexLine += addLatexChar(musicalNote, this.headInfo.beatInfo);
+            }
+            latexBody.push(latexLine);
+        }
+
+        function addLatexChar(musicalNote, beatInfo) {
+            let latexAppend = '';
+            let tone = musicalNote.tone;
+            let step = musicalNote.step;
+            let height = musicalNote.height;
+            let length = musicalNote.length;
+            let baseBeat = beatInfo.baseBeat;
+            let beatsNumber = beatInfo.beatsNumber;
+            if(filledLength+length*baseBeat < beatsNumber)
+            {
+                latexAppend += LATEXBLANK + creatLatexChar(tone, step, height, length);
+                filledLength = filledLength+length*baseBeat;
+            }
+            else if(filledLength+length*baseBeat === beatsNumber)
+            {
+                latexAppend += LATEXBLANK + creatLatexChar(tone, step, height, length) + LATEXBLANK+ '|';
+                filledLength = 0;
+            }
+            else
+            {
+                latexAppend += LATEXBLANK
+                    + creatLatexChar(tone, step, height, beatsNumber/baseBeat - filledLength, 'left')
+                    + LATEXBLANK + '|';
+                length = length + filledLength - beatsNumber/baseBeat ;
+                filledLength = 0;
+                while(length*baseBeat > beatsNumber)
+                {
+                    latexAppend += LATEXBLANK
+                        + creatLatexChar(tone, step, height, beatsNumber/baseBeat)
+                        + LATEXBLANK + '|';
+                    length -= beatsNumber/baseBeat;
+                }
+                latexAppend += LATEXBLANK + creatLatexChar(tone, step, height, length, 'right');
+                filledLength = length;
+                if(length*baseBeat===beatsNumber)
+                {
+                    filledLength = 0;
+                    latexAppend += LATEXBLANK + '|';
+                }
+            }
+            return latexAppend;
+        }
+        return latexBody;
+    }
+}
+
+creatLatexChar = function(char, step, height, length, link) {
+    let newLatexChar = char;
+    if(height<0)
+    {
+        for(let i=0; i>height; i--)
+            newLatexChar = '\\check{'+newLatexChar+'}';
+    }
+    else if(height>0)
+    {
+        for(let i=0; i<height; i++)
+            newLatexChar = '\\dot{'+newLatexChar+'}';
+    }
+    if(link==='left')
+        newLatexChar = '\\overgroup{' + newLatexChar;
+    else if(link==='right')
+        newLatexChar = newLatexChar + '}';
+    if(length<1)
+    {
+        for(let i=1; i>length; i/=2)
+            newLatexChar = '\\underline{'+newLatexChar+"}";
+    }
+    else if(length>1)
+    {
+        for(let i=1; i<length; i++)
+            newLatexChar = newLatexChar+'-';
+    }
+    if(step<0)
+    {
+        for(let i=0; i>step; i--)
+            newLatexChar = '\\flat '+newLatexChar;
+    }
+    else if(step>0)
+    {
+        for(let i=0; i<step; i++)
+            newLatexChar = '\\sharp '+newLatexChar;
+    }
+    return newLatexChar;
+};
+
+module.exports.parseContent = function (editor) {
+
+
+    const lineCount = editor.lineCount();
+
+    // parse head
+    let headInfo = {
+        title: '',
+        composer: '',
+        compiler: '',
+        bpm: 80,
+        beatInfo: new BeatInfo(4, 1),
+        headEndAtLine: 0
+    };
+    let stage = 1;
+    let property = ''; // stage 1
+    // operator // stage 2
+    let value = null; // stage 3
+    outerFor: for(let i=0; i<lineCount; i++)
+    {
+        const tokens = editor.getLineTokens(i);
+        for(let token of tokens)
+        {
+            if(token.type === 'tone' || token.type === 'note')
+            {
+                headInfo.headEndAtLine = i-1;
+                break outerFor;
+            }
+            switch (stage) {
+                case 1:
+                    if(token.type === 'keyword')
+                    {
+                        stage = 2;
+                        property = token.string;
+                    }
+                    break;
+                case 2:
+                    if(token.type === 'operator')
+                        stage = 3;
+                    else
+                        stage = 1;
+                    break;
+                case 3:
+                    switch (property) {
+                        case 'title':
+                        case 'composer':
+                        case 'compiler':
+                            if(token.type === 'string')
+                                value = token.string.slice(1, token.string.length-1);
+                            break;
+                        case 'bpm':
+                            if(token.type === 'number')
+                                value = +token.string;
+                            break;
+                        case 'beatInfo':
+                            if(token.type === 'beatInfo')
+                                value = new BeatInfo(+token.string.slice(1,2),
+                                    +token.string.slice(3, token.string.length-1)/4);
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            if(value != null)
+            {
+                headInfo[property] = value;
+                property = '';
+                value = null;
+                stage = 1;
+            }
+        }
+    }
+
+    // parse body
+    let bodyInfo = [];
+    for(let i=headInfo.headEndAtLine+1; i<lineCount; i++)
+    {
+        let lineInfo = [];
+        const tokens = editor.getLineTokens(i);
+        let tone = null; // stage 1
+        let notes='', step=0, height=0, length=1; // stage 2
+        let stage = 1;
+        for(let token of tokens)
+        {
+            switch (stage) {
+                case 2:
+                    if(token.type === 'note')
+                    {
+                        notes = token.string;
+                        for(let note of notes)
+                        {
+                            switch (note) {
+                                case 'b': step--;break;
+                                case '#': step++;break;
+                                case '/': length/=2;break;
+                                case '*': length*=2;break;
+                                case '.': length++;break;
+                                case '-': height--;break;
+                                case '+': height++;break;
+                            }
+                        }
+                    }
+                    lineInfo.push(new MusicalNote(tone, step, length, height));
+                    stage = 1;
+                    step=0; height=0; length=1;
+                    // 故意让没有操作符号的音符经过case 1！！！
+                    if(token.type !== 'tone')
+                        break;
+                case 1:
+                    if(token.type === 'tone')
+                    {
+                        tone = +token.string;
+                        stage = 2;
+                    }
+                    break;
+            }
+        }
+        // 防止最后一个没有操作符号的音符不被显示
+        if(stage===2)
+            lineInfo.push(new MusicalNote(tone, step, length, height));
+        bodyInfo.push(lineInfo);
+    }
+
+    return new ParsedContent(headInfo, bodyInfo);
+};
+
+
