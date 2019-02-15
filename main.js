@@ -136,7 +136,7 @@ function creatPerformanceWindow(frameless)
                 event.preventDefault();
                 keyMappingWindow.webContents.send('action', 'closing');
             });
-            keyMappingWindow.on('closed',(event)=>{
+            keyMappingWindow.on('closed',()=>{
                 keyMappingWindow = null;
             })
         },
@@ -183,10 +183,10 @@ ipcMain.on('performanceAction', (event, arg)=>{
     }
 });
 
-ipcMain.on('notesPrepared', (event, notes)=>{
+ipcMain.on('notesPrepared', (event, playEvents)=>{
     performanceWindow.setBounds({height: 600});
     performanceWindow.center();
-    performanceWindow.webContents.send('notes', notes);
+    performanceWindow.webContents.send('notes', playEvents);
 });
 
 ipcMain.on('keyMappingAction', (event, arg)=>{

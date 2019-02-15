@@ -1,7 +1,4 @@
 const { ipcRenderer, remote } = require('electron');
-const {getPlayEvents} = require('./src/functions/SoundfontEventsProvider');
-const {parseHead} = require('./src/functions/header');
-const {language} = require('./src/languages/selected');
 // true-left, false-right
 const InstrumentLayoutStatus = {fullOrFolded: false, keyboardOrController: false};
 
@@ -323,12 +320,8 @@ ipcRenderer.on('action', (event, arg) => {
     }
 });
 
-ipcRenderer.on('notes', (event, arg)=>{
-    notes = arg;
-    // window.alert("receive notes!");
-    // TODO:
-    let headInfo = parseHead(arg);
-    playEvents = getPlayEvents(arg, headInfo);
+ipcRenderer.on('notes', (event, pe)=>{
+    playEvents = pe;
     drawScrollArea(-aheadOfTime);
     if(!isLooping)
         startScrollAreaLoop();

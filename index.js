@@ -2,9 +2,6 @@ const { ipcRenderer, remote} = require('electron');
 const { Menu, MenuItem, dialog } = remote;
 const Katex = require('katex');
 const path = require('path');
-const {replaceWithLatex} = require('./src/functions/preprocessNotes');
-const {getPlayEvents} = require('./src/functions/SoundfontEventsProvider');
-const {parseHead} = require('./src/functions/header');
 const {language} = require('./src/languages/selected');
 const {parseContent} = require('./src/functions/parseContent');
 
@@ -42,7 +39,6 @@ Soundfont.instrument(audioContext, path.join(__dirname, 'lib', 'instruments','ac
 
 function drawDisplayArea()
 {
-    // TODO:
     let headInfo = parsedContent.headInfo;
     title.innerText = headInfo.title;
     composer.innerText = headInfo.composer;
@@ -103,13 +99,12 @@ ipcRenderer.on('action', (event, arg) => {
         case 'play':
             if(player!=null)
             {
-                // TODO:
-                // let headInfo = parseHead(editor.getValue());
-                // player.schedule(audioContext.currentTime, getPlayEvents(editor.getValue(), headInfo));
+                player.schedule(audioContext.currentTime, parsedContent.getPlayEvents());
             }
             break;
         case 'prepareAidPerform':
-            ipcRenderer.send('notesPrepared', editor.getValue());
+            // ipcRenderer.send('notesPrepared', editor.getValue());
+            ipcRenderer.send('notesPrepared', parsedContent.getPlayEvents());
             break;
         case 'new': // 新建文件
             askSaveIfNeed();
