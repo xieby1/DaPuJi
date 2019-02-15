@@ -39,6 +39,7 @@ Soundfont.instrument(audioContext, path.join(__dirname, 'lib', 'instruments','ac
 
 function drawDisplayArea()
 {
+    parsedContent = parseContent(editor);
     let headInfo = parsedContent.headInfo;
     title.innerText = headInfo.title;
     composer.innerText = headInfo.composer;
@@ -64,14 +65,12 @@ function drawDisplayArea()
     }
 }
 
-parsedContent = parseContent(editor);
 drawDisplayArea();
 
 editor.on('change', ()=>{
     if(isSaved)
         document.title += ' *';
     isSaved = false;
-    parsedContent = parseContent(editor);
     drawDisplayArea();
 });
 

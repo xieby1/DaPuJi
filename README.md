@@ -1,6 +1,6 @@
 # 打谱机
 
-## 版本：0.1.0
+## 版本：0.1.1
 
 一款用electron框架创建的编写简谱、播放简谱、练习和辅助演奏的软件
 
@@ -34,9 +34,16 @@ $ npm start
 ## 功能
 
 * 通过简单的代码（遵守打谱机的语法）来编写乐谱
+
+![mainWindow](./readmePictures/mainWindow.gif)
+
 * 播放乐谱代码
 * 通过手柄或键盘进行演奏
 * 根据乐谱代码来生成类似音乐游戏的滑动条，用以练习和辅助演奏
+
+![fullAidPerform](./readmePictures/fullAidPerform.gif)
+
+![foldedAidPerform](./readmePictures/foldedAidPerform.gif)
 
 ## 打谱机语法
 
@@ -77,3 +84,7 @@ b - 升调符号
 + - 音高升高
 0 - 修止符号
 ```
+
+## 代码结构（正在整理）
+
+![打谱机结构图](./readmePictures/打谱机结构图.svg)

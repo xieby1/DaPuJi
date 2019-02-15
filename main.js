@@ -129,22 +129,24 @@ function creatPerformanceWindow(frameless)
     }));
     performanceMenu.append(new MenuItem({
         label: language.keyMapping,
-        click(){
-            keyMappingWindow = new BrowserWindow({width:600, height:400, parent: performanceWindow, autoHideMenuBar: true});
-            keyMappingWindow.loadFile('keyMapping.html');
-            keyMappingWindow.on('close',(event)=>{
-                event.preventDefault();
-                keyMappingWindow.webContents.send('action', 'closing');
-            });
-            keyMappingWindow.on('closed',()=>{
-                keyMappingWindow = null;
-            })
-        },
+        click: createKeyMappingWindow,
     }));
     performanceWindow.setMenu(performanceMenu);
     performanceWindow.on('closed', function () {
         performanceWindow = null
     })
+}
+
+function createKeyMappingWindow(){
+    keyMappingWindow = new BrowserWindow({width:600, height:400, parent: performanceWindow, autoHideMenuBar: true});
+    keyMappingWindow.loadFile('keyMapping.html');
+    keyMappingWindow.on('close',(event)=>{
+        event.preventDefault();
+        keyMappingWindow.webContents.send('action', 'closing');
+    });
+    keyMappingWindow.on('closed',()=>{
+        keyMappingWindow = null;
+    });
 }
 
 // This method will be called when Electron has finished
