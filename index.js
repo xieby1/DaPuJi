@@ -6,15 +6,19 @@ const {replaceWithLatex} = require('./src/functions/preprocessNotes');
 const {getPlayEvents} = require('./src/functions/SoundfontEventsProvider');
 const {parseHead} = require('./src/functions/header');
 const {language} = require('./src/languages/selected');
+const {parseContent} = require('./src/functions/parseContent');
 
 const editArea = document.getElementById('editArea');
 const title = document.getElementById('title');
 const composer = document.getElementById('composer');
 const compiler = document.getElementById('compiler');
 const bpm_beatInfo = document.getElementById('bpm_beatInfo');
+const katexDisplayArea = document.getElementById('katexDisplayArea');
 
 let currentFile = null;
 let isSaved = true;
+
+let parsedContent = {};
 
 const editor = CodeMirror(editArea, {
     // 编辑器的初始内容
@@ -38,14 +42,21 @@ Soundfont.instrument(audioContext, path.join(__dirname, 'lib', 'instruments','ac
 
 function drawDisplayArea()
 {
-    let content = editor.getValue();
-    let headInfo = parseHead(content);
+    // TODO:
+    let headInfo = parsedContent.headInfo;
     title.innerText = headInfo.title;
     composer.innerText = headInfo.composer;
     bpm_beatInfo.innerText = 'bpm='+headInfo.bpm + ' '
         + headInfo.beatInfo.beatsNumber + '/' + headInfo.beatInfo.baseBeat*4;
-    Katex.render(replaceWithLatex(content, headInfo), document.getElementById('katexDisplayArea'));
 
+
+    katexDisplayArea.innerText = '';
+    for(let latexLine of parsedContent.getLatexBody())
+    {
+        let newDiv = document.createElement('div');
+        katexDisplayArea.appendChild(newDiv);
+        Katex.render(latexLine, newDiv);
+    }
     // 重新对latex代码进行排版
     let katex_htmls = document.getElementsByClassName('katex-html');
     for(let katex_html of katex_htmls)
@@ -57,12 +68,14 @@ function drawDisplayArea()
     }
 }
 
+parsedContent = parseContent(editor);
 drawDisplayArea();
 
 editor.on('change', ()=>{
     if(isSaved)
         document.title += ' *';
     isSaved = false;
+    parsedContent = parseContent(editor);
     drawDisplayArea();
 });
 
@@ -90,8 +103,9 @@ ipcRenderer.on('action', (event, arg) => {
         case 'play':
             if(player!=null)
             {
-                let headInfo = parseHead(editor.getValue());
-                player.schedule(audioContext.currentTime, getPlayEvents(editor.getValue(), headInfo));
+                // TODO:
+                // let headInfo = parseHead(editor.getValue());
+                // player.schedule(audioContext.currentTime, getPlayEvents(editor.getValue(), headInfo));
             }
             break;
         case 'prepareAidPerform':

@@ -326,6 +326,7 @@ ipcRenderer.on('action', (event, arg) => {
 ipcRenderer.on('notes', (event, arg)=>{
     notes = arg;
     // window.alert("receive notes!");
+    // TODO:
     let headInfo = parseHead(arg);
     playEvents = getPlayEvents(arg, headInfo);
     drawScrollArea(-aheadOfTime);
