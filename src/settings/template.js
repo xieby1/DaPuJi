@@ -21,3 +21,4 @@ module.exports.KeyName = {
     do: '1', re: '2', mi: '3', fa: '4', so: '5', la: '6', si: '7', dd: 'i',
     sharp: '♯', high: '↑'
 };
+module.exports.KeyboardMode = {...module.exports.KeyboardWhite, ...module.exports.KeyboardBlack};
