@@ -35,15 +35,15 @@ $ npm start
 
 * 通过简单的代码（遵守打谱机的语法）来编写乐谱
 
-![mainWindow](./readmePictures/mainWindow.gif)
+<img src="./readmePictures/mainWindow.gif" style="height:400px;"/>
+
 
 * 播放乐谱代码
 * 通过手柄或键盘进行演奏
 * 根据乐谱代码来生成类似音乐游戏的滑动条，用以练习和辅助演奏
 
-![fullAidPerform](./readmePictures/fullAidPerform.gif)
+<span><img src="./readmePictures/fullAidPerform.gif" style="height: 280px;"/><img src="./readmePictures/foldedAidPerform.gif" style="height: 280px;"/></span>
 
-![foldedAidPerform](./readmePictures/foldedAidPerform.gif)
 
 ## 打谱机语法
 
