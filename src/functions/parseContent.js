@@ -11,12 +11,14 @@ class BeatInfo
 
 class MusicalNote
 {
-    constructor(tone, step, length, height)
+    constructor(tone, step, length, height, fromCh, toCh)
     {
         this.tone = tone;
         this.step = step;
         this.length = length;
         this.height = height;
+        this.fromCh = fromCh;
+        this.toCh = toCh;
     }
 }
 
@@ -153,8 +155,6 @@ creatLatexChar = function(char, step, height, length, link) {
 };
 
 module.exports.parseContent = function (editor) {
-
-
     const lineCount = editor.lineCount();
 
     // parse head
@@ -232,47 +232,35 @@ module.exports.parseContent = function (editor) {
     {
         let lineInfo = [];
         const tokens = editor.getLineTokens(i);
-        let tone = null; // stage 1
-        let notes='', step=0, height=0, length=1; // stage 2
-        let stage = 1;
-        for(let token of tokens)
+        for(let i=0; i<tokens.length; i++)
         {
-            switch (stage) {
-                case 2:
-                    if(token.type === 'note')
+            if(tokens[i].type === 'tone')
+            {
+                let fromCh = tokens[i].start;
+                let toCh = tokens[i].end;
+                let tone = +tokens[i].string;
+                let step=0, height=0, length=1;
+                // 查看后面是否紧跟着一个note
+                if(i+1<tokens.length && tokens[i+1].type==='note')
+                {// 后面紧跟着一个note
+                    let notes = tokens[i+1].string;
+                    for(let note of notes)
                     {
-                        notes = token.string;
-                        for(let note of notes)
-                        {
-                            switch (note) {
-                                case 'b': step--;break;
-                                case '#': step++;break;
-                                case '/': length/=2;break;
-                                case '*': length*=2;break;
-                                case '.': length++;break;
-                                case '-': height--;break;
-                                case '+': height++;break;
-                            }
+                        switch (note) {
+                            case 'b': step--;break;
+                            case '#': step++;break;
+                            case '/': length/=2;break;
+                            case '*': length*=2;break;
+                            case '.': length++;break;
+                            case '-': height--;break;
+                            case '+': height++;break;
                         }
                     }
-                    lineInfo.push(new MusicalNote(tone, step, length, height));
-                    stage = 1;
-                    step=0; height=0; length=1;
-                    // 故意让没有操作符号的音符经过case 1！！！
-                    if(token.type !== 'tone')
-                        break;
-                case 1:
-                    if(token.type === 'tone')
-                    {
-                        tone = +token.string;
-                        stage = 2;
-                    }
-                    break;
+                    toCh = tokens[i+1].end;
+                }
+                lineInfo.push(new MusicalNote(tone, step, length, height, fromCh, toCh));
             }
         }
-        // 防止最后一个没有操作符号的音符不被显示
-        if(stage===2)
-            lineInfo.push(new MusicalNote(tone, step, length, height));
         bodyInfo.push(lineInfo);
     }
 

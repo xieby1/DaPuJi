@@ -74,6 +74,15 @@ editor.on('change', ()=>{
     drawDisplayArea();
 });
 
+// 为displayArea添加选中行的阴影
+editor.on('cursorActivity', ()=>{
+    let selectedLine = editor.getCursor().line - parsedContent.headInfo.headEndAtLine - 1;
+    for(let lineDOM of katexDisplayArea.children)
+        lineDOM.setAttribute('style', '');
+    if(selectedLine>=0)
+        katexDisplayArea.children[selectedLine].setAttribute('style', 'background-color: #F0F0F0;');
+});
+
 document.title = language.appName + ' - ' + language.untitled; // 设置文档标题，影响窗口标题栏名称
 
 // 给文本框增加右键菜单
