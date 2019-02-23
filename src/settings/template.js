@@ -16,7 +16,7 @@ module.exports.KeyboardBlack = {
     doS: 1, reS:3, faS: 6, soS: 8, laS: 10,
     doS_: 13, reS_:15, faS_: 18, soS_: 20, laS_: 22
 };
-module.exports.KeyName = {
+module.exports.KeyTags = {
     low: '↓', flat: '♭',
     do: '1', re: '2', mi: '3', fa: '4', so: '5', la: '6', si: '7', dd: 'i',
     sharp: '♯', high: '↑'

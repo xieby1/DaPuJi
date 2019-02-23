@@ -1,8 +1,15 @@
 const { ipcRenderer, remote } = require('electron');
 // true-left, false-right
 const InstrumentLayoutStatus = {fullOrFolded: false, keyboardOrController: false};
+const {PianoKeyboard} = require('./src/classes/pianoKeyboard');
+const KeyboardModeTemplate = require('./src/settings/template').KeyboardMode;
+const ControllerModeTemplate = require('./src/settings/template').ControllerMode;
+
+const pianoKeyboard = new PianoKeyboard(document.getElementById('pianoKeyboard'));
+pianoKeyboard.switchToFoldedMode();
 
 // 以下为滚动区域相关
+let do1 = 60;
 let notes = '';
 let playEvents = [];
 let aheadOfTime = 3000; // ms
@@ -77,7 +84,7 @@ function drawScrollArea(relativeTime){
                     continue;
                 if(do1+KeyboardModeTemplate[key]===midi)
                 {
-                    keyDOM = Keys[key];
+                    keyDOM = pianoKeyboard.keys[key].DOM;
                     break;
                 }
             }
@@ -104,7 +111,7 @@ function drawScrollArea(relativeTime){
                     continue;
                 if(do1+ControllerModeTemplate[key]===midi)
                 {
-                    keyDOM = Keys[key];
+                    keyDOM = pianoKeyboard.keys[key].DOM;
                     break;
                 }
             }
@@ -118,18 +125,18 @@ function drawScrollArea(relativeTime){
                         continue;
                     if(do1+ControllerModeTemplate[key]+1===midi)
                     {
-                        keyDOM = Keys[key];
+                        keyDOM = pianoKeyboard.keys[key].DOM;
                         break;
                     }
                 }
             }
             addAScrollBar(keyDOM);
             if(isSharp)
-                addAScrollBar(Keys['sharp']);
+                addAScrollBar(pianoKeyboard.keys['sharp'].DOM);
             if(isHigh)
-                addAScrollBar(Keys['high']);
+                addAScrollBar(pianoKeyboard.keys['high'].DOM);
             if(isLow)
-                addAScrollBar(Keys['low']);
+                addAScrollBar(pianoKeyboard.keys['low'].DOM);
         }
     }
 }
@@ -149,7 +156,7 @@ function disconnectHandler(e) {
 }
 let ControllerTemplate = require('./src/settings/keyMappingSetting').keyMapping.controller;
 
-switchToFoldedMode();
+pianoKeyboard.switchToFoldedMode();
 refreshControllerButtonTag();
 
 const ControllerPress = {};
@@ -165,9 +172,9 @@ function refreshControllerButtonMapping() {
                 refreshControllerButtonTag();
                 InstrumentLayoutStatus.keyboardOrController = false;
             }
-            FuncPress[ControllerTemplate[key]]();
+            pianoKeyboard.keys[ControllerTemplate[key]].pressAction();
         };
-        ControllerRelease[key] = FuncRelease[ControllerTemplate[key]];
+        ControllerRelease[key] = pianoKeyboard.keys[ControllerTemplate[key]].releaseAction;
     }
     refreshControllerButtonTag();
 }
@@ -247,20 +254,20 @@ document.addEventListener('keydown', (e)=>{
     }
     for(let key in KeyboardAction)
         if(e.code === KeyboardAction[key].code)
-            FuncPress[key]();
+            pianoKeyboard.keys[key].pressAction();
 });
 document.addEventListener('keyup', (e)=>{
 
     for(let key in KeyboardAction)
         if(e.code === KeyboardAction[key].code)
-            FuncRelease[key]();
+            pianoKeyboard.keys[key].releaseAction();
 });
 // 以上为键盘相关
 function refreshKeyboardButtonTag()
 {
     for(let key in KeyboardModeTemplate)
     {
-        for(let elem of Keys[key].children)
+        for(let elem of pianoKeyboard.keys[key].DOM.children)
         {
             if(elem.className==='key')
             {
@@ -275,7 +282,7 @@ function refreshControllerButtonTag()
     for(let button in ControllerTemplate)
     {
         let key = ControllerTemplate[button];
-        for(let elem of Keys[key].children)
+        for(let elem of pianoKeyboard.keys[key].DOM.children)
         {
             if(elem.className==='key')
             {
@@ -293,13 +300,13 @@ ipcRenderer.on('action', (event, arg) => {
             if(InstrumentLayoutStatus.fullOrFolded)
             {
                 ipcRenderer.send('performanceAction', 'resizeFolded');
-                switchToFoldedMode();
+                pianoKeyboard.switchToFoldedMode();
                 InstrumentLayoutStatus.fullOrFolded = false;
             }
             else
             {
                 ipcRenderer.send('performanceAction', 'resizeFull');
-                switchToFullMode();
+                pianoKeyboard.switchToFullMode();
                 InstrumentLayoutStatus.fullOrFolded = true;
             }
             break;
@@ -314,7 +321,7 @@ ipcRenderer.on('action', (event, arg) => {
             refreshKeyboardMapping();
             break;
         case 'toggleMute':
-            toggleMute();
+            pianoKeyboard.toggleMute();
             break;
         default:
     }
